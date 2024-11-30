@@ -21,7 +21,7 @@ const orderSchema = new mongoose.Schema(
     discountGift: {
       type: Number,
     },
-    discoutnSubscribe: {
+    discountSubscribe: {
       type: Number,
     },
     cart_id: {
@@ -48,7 +48,7 @@ const orderSchema = new mongoose.Schema(
     address: {
       type: {
         street: String,
-        appartmentNumber: Number,
+        apartmentNumber: Number,
       },
       required: true,
     },
