@@ -1,0 +1,30 @@
+{
+  "name": "ecommerce-flower-delivery-backend",
+  "version": "1.0.0",
+  "main": "dist/server.js",
+  "dependencies": {
+    "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.10.1",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.11.0",
+    "mongoose": "^8.8.3",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.16.0",
+    "eslint": "^9.16.0",
+    "globals": "^15.12.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.16.0"
+  },
+  "scripts": {
+    "start": "nodemon ./dist/server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
