@@ -1,22 +1,37 @@
 import express from "express";
 import path from "path";
 
-import userRouter from "./routes/userRoutes";
-import cartRouter from "./routes/cartRoutes";
-import orderRouter from "./routes/orderRoutes";
-import categoryRouter from "./routes/categoryRoutes";
-import productRouter from "./routes/productRoutes";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
 import accessoryRouter from "./routes/accessoryRoutes";
-import subscribeRouter from "./routes/subscribeRoutes";
+import cartRouter from "./routes/cartRoutes";
+import categoryRouter from "./routes/categoryRoutes";
 import contactRouter from "./routes/contactRoutes";
-import passwordResetRouter from "./routes/passwordResetRoutes";
-import reminderRouter from "./routes/reminderRoutes";
-import reviewRouter from "./routes/reminderRoutes";
 import discountRouter from "./routes/discountRoutes";
-
+import orderRouter from "./routes/orderRoutes";
+import passwordResetRouter from "./routes/passwordResetRoutes";
+import productRouter from "./routes/productRoutes";
+import {
+  default as reminderRouter,
+  default as reviewRouter,
+} from "./routes/reminderRoutes";
+import subscribeRouter from "./routes/subscribeRoutes";
+import userRouter from "./routes/userRoutes";
+import authRouter from "./routes/authRoutes";
 const app = express();
+//? Middleware
+app.use(cors());
+app.use(helmet());
+app.use(morgan("dev"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+app.use(express.static(path.join(__dirname, "dist")));
+app.use("/upload", express.static(path.join(__dirname, "./../public")));
 app.use(express.static(path.resolve("./public")));
+
+app.use("/api/v1/auth", authRouter);
 
 app.use("/api/v1/user", userRouter);
 
