@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-
+import mongoose, { InferSchemaType, model } from "mongoose";
+import bcrypt from "bcrypt";
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -43,5 +43,31 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+type UserType = InferSchemaType<typeof userSchema>;
+userSchema.pre("save", async function (next) {
+  this.password = await bcrypt.hash(this.password, 8);
+  next();
+});
+async function comparePassword(this: UserType, enteredPassword: string) {
+  return await bcrypt.compare(enteredPassword, this.password);
+}
+userSchema.methods.comparePassword = comparePassword;
 
-export default mongoose.model("User", userSchema);
+async function toFrontend(this: UserType) {
+  this.password = "";
+  return this;
+}
+userSchema.methods.toFrontend = toFrontend;
+export const User = model<
+  UserType & {
+    comparePassword: typeof comparePassword;
+    toFrontend: typeof toFrontend;
+  }
+>("User", userSchema);
+
+export default mongoose.model<
+  UserType & {
+    comparePassword: typeof comparePassword;
+    toFrontend: typeof toFrontend;
+  }
+>("User", userSchema);
