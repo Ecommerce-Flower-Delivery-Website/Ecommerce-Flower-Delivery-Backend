@@ -17,6 +17,7 @@ const productSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
+      reuired: true,
     },
     category_id: {
       type: mongoose.Schema.Types.ObjectId,

@@ -20,6 +20,9 @@ const reminderSchema = new mongoose.Schema(
       type: [mongoose.Schema.Types.ObjectId],
       ref: "User",
     },
+    limitSend: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );

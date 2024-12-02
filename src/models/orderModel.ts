@@ -50,7 +50,6 @@ const orderSchema = new mongoose.Schema(
         street: String,
         apartmentNumber: Number,
       },
-      required: true,
     },
     doesKnowAddress: {
       type: Boolean,

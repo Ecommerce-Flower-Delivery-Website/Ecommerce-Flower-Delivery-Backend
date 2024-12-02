@@ -19,6 +19,10 @@ const cartSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    giftMessage: {
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: true }
 );
