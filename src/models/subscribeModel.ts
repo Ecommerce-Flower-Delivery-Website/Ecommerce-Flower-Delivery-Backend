@@ -1,6 +1,19 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-const subscribeSchema = new mongoose.Schema(
+export interface ISubscribe extends Document {
+  title: string;
+  image: string;
+  price: number;
+  isFreeDelivery?: boolean;
+  discount?: number;
+  features: string[];
+  deliveryFrequency: string;
+  deliveryCount: number;
+  users_id?: mongoose.Types.ObjectId[];
+}
+
+
+const subscribeSchema = new Schema<ISubscribe>(
   {
     title: {
       type: String,
@@ -22,7 +35,7 @@ const subscribeSchema = new mongoose.Schema(
     discount: {
       type: Number,
     },
-    fetures: {
+    features: {
       type: [String],
       required: true,
     },
@@ -42,4 +55,6 @@ const subscribeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Subscribe", subscribeSchema);
+const Subscribe = mongoose.model("Subscribe", subscribeSchema);
+
+export default Subscribe;

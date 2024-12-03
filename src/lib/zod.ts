@@ -49,4 +49,5 @@ export const validateSchemas = {
     email: userEmailSchema,
     password: passwordZodSchema(),
   }),
+  
 };
