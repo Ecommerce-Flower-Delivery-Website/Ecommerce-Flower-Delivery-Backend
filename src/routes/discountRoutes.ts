@@ -1,5 +1,5 @@
 import express from "express";
-const discountController = require("./../controllers/discount");
+import discountController from "./../controllers/discountController";
 
 const router = express.Router();
 

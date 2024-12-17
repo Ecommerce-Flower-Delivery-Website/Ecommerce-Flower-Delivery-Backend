@@ -1,5 +1,5 @@
 import express from "express";
-const reviewController = require("./../controllers/reviewController");
+import reviewController from "./../controllers/reviewController";
 
 const router = express.Router();
 

@@ -1,5 +1,5 @@
 import express from "express";
-const subscribeController = require("./../controllers/subscribeController");
+import subscribeController from "./../controllers/subscribeController";
 
 const router = express.Router();
 
