@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { createToken } from "../lib/jwt";
-import { validateSchemas } from "../lib/zod";
+import { validateSchemas } from "../validation/userValidation";
 import { User } from "../models/userModel";
 
 export const register = async (req: Request, res: Response) => {
@@ -86,6 +86,7 @@ export const login = async (req: Request, res: Response) => {
     });
   }
 };
+
 export const login_admin = async (req: Request, res: Response) => {
   const { success, error, data } = await validateSchemas.login.safeParseAsync(
     req.body
