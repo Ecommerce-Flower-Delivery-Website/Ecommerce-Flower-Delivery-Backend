@@ -1,3 +1,3 @@
-import PasswordReset from "./../models/passwordReset";
+import PasswordReset from "./../models/passwordResetModel";
 
 export default {};
