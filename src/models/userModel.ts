@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-type UserType = InferSchemaType<typeof userSchema>;
+export type UserType = InferSchemaType<typeof userSchema>;
 userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 8);
   next();

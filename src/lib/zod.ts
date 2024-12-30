@@ -24,6 +24,65 @@ const userEmailSchema = z
     invalid_type_error: "wrong email format",
   })
   .email("email is required");
+
+const createOrderSchema = z.object({
+  discountGift: z
+    .number({ invalid_type_error: "Discount gift must be a number" })
+    .optional(),
+  discountSubscribe: z
+    .number({ invalid_type_error: "Discount subscribe must be a number" })
+    .optional(),
+  cart_id: z
+    .string({ invalid_type_error: "Cart ID must be a string" })
+    .min(1, { message: "Cart ID is required" }),
+  recipientName: z
+    .string({ invalid_type_error: "Recipient name must be a string" })
+    .min(1, { message: "Recipient name is required" }),
+  recipientPhone: z
+    .string({ invalid_type_error: "Recipient phone must be a string" })
+    .min(1, { message: "Recipient phone is required" })
+    .regex(/^\+?[1-9]\d{1,14}$/, {
+      message: "Recipient phone must be a valid phone number",
+    }),
+  dateDelivery: z
+    .string({
+      invalid_type_error: "Delivery date must be a string in dd/mm/yyyy format",
+    })
+    .regex(/^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/, {
+      message: "Delivery date must be in the format dd/mm/yyyy",
+    })
+    .refine(
+      (date) => {
+        const [day, month, year] = date.split("/").map(Number);
+        const parsedDate = new Date(year, month - 1, day);
+        return parsedDate > new Date();
+      },
+      { message: "Delivery date must be in the future" }
+    ),
+  timeDelivery: z
+    .string({ invalid_type_error: "Delivery time must be a string" })
+    .min(1, { message: "Delivery time is required" }),
+  address: z.object({
+    street: z
+      .string({ invalid_type_error: "Street must be a string" })
+      .min(1, { message: "Street is required" }),
+    apartmentNumber: z
+      .number({ invalid_type_error: "Apartment number must be a number" })
+      .positive({ message: "Apartment number must be greater than zero" }),
+  }),
+  doesKnowAddress: z.boolean().optional(),
+  cardNumber: z
+    .string({ invalid_type_error: "Card number must be a string" })
+    .min(1, { message: "Card number is required" })
+    .regex(/^\d{16}$/, { message: "Card number must be exactly 16 digits" }),
+  cvvCode: z
+    .string({ invalid_type_error: "CVV code must be a string" })
+    .min(1, { message: "CVV code is required" })
+    .regex(/^\d{3}$/, { message: "CVV code must be exactly 3 digits" }),
+});
+
+const updateOrderSchema = createOrderSchema.partial();
+
 export const validateSchemas = {
   signup: z
     .object({
@@ -49,4 +108,6 @@ export const validateSchemas = {
     email: userEmailSchema,
     password: passwordZodSchema(),
   }),
+  createOrderSchema,
+  updateOrderSchema,
 };
