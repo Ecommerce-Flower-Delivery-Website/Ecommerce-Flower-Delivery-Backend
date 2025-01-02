@@ -4,13 +4,17 @@ import subscribeModel, { subscribeType } from "@/models/subscribeModel";
 import { UserType } from "@/models/userModel";
 import { sendResponse } from "@/utils/helpers";
 import { createOrderSchema } from "@/validation/orderValidation";
-import { Request, Response } from "express";
-import { ValidationError } from "zod-validation-error";
+import { NextFunction, Request, Response } from "express";
+import { ValidationError, fromError } from "zod-validation-error";
 
 type OrderCreateRequest = typeof createOrderSchema._input;
 
 const OrdersController = {
-  async create(req: Request & { user?: UserType }, res: Response) {
+  async create(
+    req: Request & { user?: UserType },
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       const data = req.body as Partial<OrderCreateRequest>;
       const user = req.user;
@@ -47,9 +51,7 @@ const OrdersController = {
         discount = await subscribeModel.findById(user.subscribe_id);
       }
 
-      // Validate the request body using createOrderSchema
       const validatedData = createOrderSchema.parse(req.body);
-      console.log("validatedData", validatedData);
       const newOrder = await orderModel.create({
         array_product: cartInfo.product_array,
         totalAmount: cartInfo.totalAmount,
@@ -72,24 +74,21 @@ const OrdersController = {
     } catch (error) {
       if (error instanceof ValidationError) {
         // Format the error using zod-validation-error
-        const formattedError = error.message;
+        const formattedError = fromError(error).message;
         return sendResponse(res, 400, {
           status: "fail",
           message: formattedError,
         });
       } else {
-        sendResponse(res, 400, {
-          status: "fail",
-          message: JSON.stringify(error),
-        });
+        next(error);
       }
     }
   },
 
-  async getAll(req: Request, res: Response) {
+  async getAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const page = parseInt(req.query.page as string) || 1; // Default to page 1
-      const limit = parseInt(req.query.limit as string) || 10; // Default to 10 items per page
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
       const skip = (page - 1) * limit;
 
       const orders = await orderModel.find().skip(skip).limit(limit);
@@ -97,7 +96,6 @@ const OrdersController = {
       const totalOrders = await orderModel.countDocuments();
       const totalPages = Math.ceil(totalOrders / limit);
 
-      // Send paginated response
       sendResponse(res, 200, {
         status: "success",
         data: {
@@ -110,16 +108,12 @@ const OrdersController = {
           },
         },
       });
-    } catch {
-      sendResponse(res, 500, {
-        status: "error",
-        message: "Failed to fetch orders",
-        error: "Database error",
-      });
+    } catch (error) {
+      next(error);
     }
   },
-
-  async getById(req: Request, res: Response) {
+  //TODO : remove if not used
+  async getById(req: Request, res: Response, next: NextFunction) {
     try {
       const order = await orderModel.findById(req.params.id);
       if (!order)
@@ -128,23 +122,18 @@ const OrdersController = {
           message: "Order not found",
         });
       sendResponse(res, 200, { status: "success", data: order });
-    } catch {
-      sendResponse(res, 500, {
-        status: "error",
-        message: "Failed to fetch order",
-        error: "Database error",
-      });
+    } catch (error) {
+      next(error);
     }
   },
 
-  async toggleStatus(req: Request, res: Response) {
+  async toggleStatus(req: Request, res: Response, next: NextFunction) {
     try {
       const orderId = req.params.id;
       if (!orderId)
         return sendResponse(res, 400, {
-          status: "error",
-          message: "bad request",
-          error: "Order Id is required",
+          status: "fail",
+          message: "Invalid order ID",
         });
       const order = await orderModel.findById(orderId);
       if (!order)
@@ -157,21 +146,18 @@ const OrdersController = {
       sendResponse(res, 200, { status: "success", data: order });
     } catch (error) {
       if (error instanceof ValidationError) {
-        const formattedError = error.message;
+        const formattedError = fromError(error).message;
         return sendResponse(res, 400, {
           status: "fail",
           message: formattedError,
         });
       } else {
-        sendResponse(res, 400, {
-          status: "fail",
-          message: "Validation failed",
-        });
+        next(error);
       }
     }
   },
 
-  async delete(req: Request, res: Response) {
+  async delete(req: Request, res: Response, next: NextFunction) {
     try {
       const deletedOrder = await orderModel.findByIdAndDelete(req.params.id);
       if (!deletedOrder)
@@ -180,12 +166,8 @@ const OrdersController = {
           message: "Order not found",
         });
       sendResponse(res, 200, { status: "success", data: "" });
-    } catch {
-      sendResponse(res, 500, {
-        status: "error",
-        message: "Failed to delete order",
-        error: "Database error",
-      });
+    } catch (error) {
+      next(error);
     }
   },
 };
