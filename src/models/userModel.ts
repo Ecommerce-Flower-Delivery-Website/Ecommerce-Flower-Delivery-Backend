@@ -38,14 +38,20 @@ const userSchema = new mongoose.Schema(
     },
     subscribe_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Subscribe",
     },
+    isReminder : {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true }
 );
 type UserType = InferSchemaType<typeof userSchema>;
 userSchema.pre("save", async function (next) {
-  this.password = await bcrypt.hash(this.password, 8);
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 8);
+  }
   next();
 });
 async function comparePassword(this: UserType, enteredPassword: string) {

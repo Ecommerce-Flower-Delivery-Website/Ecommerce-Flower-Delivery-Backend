@@ -6,7 +6,7 @@ const reminderSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-    },
+    },  
     festivalName: {
       type: String,
       required: true,
@@ -15,11 +15,7 @@ const reminderSchema = new mongoose.Schema(
     festivalDate: {
       type: Date,
       required: true,
-    },
-    users_id: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "User",
-    },
+    }
   },
   { timestamps: true }
 );

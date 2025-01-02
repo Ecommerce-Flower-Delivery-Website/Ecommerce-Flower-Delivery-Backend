@@ -21,16 +21,30 @@ import userRouter from "./routes/userRoutes";
 import authRouter from "./routes/authRoutes";
 const app = express();
 //? Middleware
-app.use(cors());
-app.use(helmet());
+const corsOptions = {
+  origin: "http://localhost:5173", // Replace with your frontend URL
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  optionsSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }, 
+  })
+);
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static(path.join(__dirname, "dist")));
-app.use("/upload", express.static(path.join(__dirname, "./../public")));
-app.use(express.static(path.resolve("./public")));
 
+app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, "dist")));
+app.use('/public', express.static(path.join(__dirname, './../public')));
+
+
+// app.use(express.static(path.join(__dirname, "dist")));
+// app.use("/upload", express.static(path.join(__dirname, "./../public")));
+// app.use(express.static(path.resolve("./public")));
 app.use("/api/v1/auth", authRouter);
 
 app.use("/api/v1/user", userRouter);

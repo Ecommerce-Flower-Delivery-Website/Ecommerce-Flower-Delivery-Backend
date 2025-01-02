@@ -31,9 +31,9 @@ export const validateSchemas = {
       email: userEmailSchema,
       phone: z.string().min(6).max(24),
       role: z.string().default("user"),
-      profile_image: z
-        .string({ required_error: "profile image is required" })
-        .min(1, "profile image cannot be empty"),
+      // profile_image: z
+      //   .string({ required_error: "profile image is required" })
+      //   .min(1, "profile image cannot be empty"),
       password: passwordZodSchema(),
       password_confirmation: passwordZodSchema("password confirmation"),
     })

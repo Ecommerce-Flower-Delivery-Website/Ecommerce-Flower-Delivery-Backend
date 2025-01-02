@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import app from "./app";
 import { User } from "./models/userModel";
@@ -26,7 +26,7 @@ dotenv.config();
 //? MongoDB Connection
 const PORT = process.env.PORT;
 mongoose
-  .connect(process.env.DATABASE!)
+  .connect(process.env.LOCAL_DATABASE!)
   .then(() => console.log("Connected to MongoDB"))
   .catch((error) => console.error("MongoDB connection error:", error));
 
@@ -37,12 +37,13 @@ const server = app.listen(PORT, () => {
 });
 
 //? Global Error Handling Middleware
-app.use((err: Error, req: Request, res: Response) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({
     message: "Something went wrong, try again later",
   });
 });
+
 
 process.on("unhandledRejection", (err) => {
   console.log(err);
@@ -51,3 +52,4 @@ process.on("unhandledRejection", (err) => {
     process.exit(1);
   });
 });
+
