@@ -44,7 +44,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-type UserType = InferSchemaType<typeof userSchema>;
+export type UserType = InferSchemaType<typeof userSchema>;
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();

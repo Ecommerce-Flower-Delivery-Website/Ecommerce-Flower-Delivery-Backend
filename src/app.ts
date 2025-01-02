@@ -19,6 +19,17 @@ import authRouter from "./routes/authRoutes";
 import globalErrorHandling from "./controllers/errorController";
 
 const app = express();
+//? Middleware
+app.use(
+  cors({
+    origin: "*",
+  })
+);
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Set the correct policy here
+  })
+);
 
 app.use(cors());
 app.use(helmet());
@@ -28,6 +39,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, "dist")));
 app.use(express.static(path.join(__dirname, "./../public")));
+
+app.use("/api/v1/orders", orderRouter);
 
 app.use("/api/v1/auth", authRouter);
 

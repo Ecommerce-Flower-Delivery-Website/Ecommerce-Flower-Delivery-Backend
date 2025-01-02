@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { InferSchemaType } from "mongoose";
 
 const subscribeSchema = new mongoose.Schema(
   {
@@ -41,5 +41,5 @@ const subscribeSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-export default mongoose.model("Subscribe", subscribeSchema);
+export type subscribeType = InferSchemaType<typeof subscribeSchema>;
+export default mongoose.model<subscribeType>("Subscribe", subscribeSchema);

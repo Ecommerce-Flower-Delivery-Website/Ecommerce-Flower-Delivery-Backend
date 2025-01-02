@@ -15,10 +15,10 @@ const passwordZodSchema = (name = "password") =>
       required_error: `${name} is required`,
     })
     .min(8, `${name} cannot be less than 8 character `)
-    .max(24, `${name} cannot be more than 24 character `)
-    .refine((value) => {
-      return /(?=.*[A-Z])(?=.*\d)/.test(value);
-    }, `${name} must have at least one capital and one number`);
+    .max(24, `${name} cannot be more than 24 character `);
+// .refine((value) => {
+//   return /(?=.*[A-Z])(?=.*\d)/.test(value);
+// }, `${name} must have at least one capital and one number`);
 
 const userEmailSchema = z
   .string({
