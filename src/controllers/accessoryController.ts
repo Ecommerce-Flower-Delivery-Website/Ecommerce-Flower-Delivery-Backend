@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Accessory from "../models/accessoryModel"; // Adjust the path based on your project structure
 import { ZodError } from "zod";
-import accessorySchema from "../validation/accessoryValidation";
+import { accessorySchema, updateAccessorySchema } from "../validation/accessoryValidation";
 import { Types } from "mongoose";
 
 /**
@@ -16,11 +16,24 @@ export const getAllAccessoriesController = async (
   res: Response
 ): Promise<void> => {
   try {
-    const accessories = await Accessory.find();
+    const ACCESSORIES_PER_PAGE = 10;
+    const { pageNumber } = req.query;
+
+    const page = parseInt(pageNumber as string, 10) || 1;
+
+    const totalAccessories = await Accessory.countDocuments();
+
+    const totalPages = Math.ceil(totalAccessories / ACCESSORIES_PER_PAGE);
+
+    const accessories = await Accessory.find()
+      .skip((page - 1) * ACCESSORIES_PER_PAGE)
+      .limit(ACCESSORIES_PER_PAGE)
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
-      message: "accessories received",
+      message: "Accessories received",
       accessories,
+      totalPages,
     });
   } catch (error) {
     res.status(500).json({
@@ -109,29 +122,30 @@ export const getAccessoryByIdController = async (
 export const updateAccessoryController = async (
   req: Request,
   res: Response
-): Promise<void> => {
+): Promise<any> => {
   try {
     const { id } = req.params;
 
-    // Type guard to ensure id is a valid ObjectId
+    const parsedBody = updateAccessorySchema.parse(req.body);
+
     if (!Types.ObjectId.isValid(id)) {
-      res.status(400).json({ error: "Invalid accessory ID" });
+      return res.status(400).json({ error: "Invalid accessory ID" });
     }
 
-    const updatedAccessory = await Accessory.findByIdAndUpdate(id, req.body, {
+    const updatedAccessory = await Accessory.findByIdAndUpdate(id, parsedBody, {
       new: true,
     });
 
     if (!updatedAccessory) {
-      res.status(404).json({ error: "Accessory not found" });
+      return res.status(404).json({ error: "Accessory not found" });
     }
 
     res.status(200).json(updatedAccessory);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ 
+    res.status(500).json({
       status: "error",
-      message: "Internal Server Error"
+      message: "Internal Server Error",
     });
   }
 };
