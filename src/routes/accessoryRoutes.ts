@@ -1,5 +1,6 @@
 import express from "express";
-const accessoryController = require("./../controllers/accessoryController");
+
+import accessoryController from "./../controllers/accessoryController";
 
 const router = express.Router();
 

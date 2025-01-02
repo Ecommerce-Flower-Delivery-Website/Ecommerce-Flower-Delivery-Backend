@@ -1,5 +1,5 @@
 import express from "express";
-const contactController = require("./../controllers/contactController");
+import contactController from "./../controllers/contactController";
 
 const router = express.Router();
 

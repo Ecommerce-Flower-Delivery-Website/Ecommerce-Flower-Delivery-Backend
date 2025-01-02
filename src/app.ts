@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
@@ -12,13 +11,13 @@ import discountRouter from "./routes/discountRoutes";
 import orderRouter from "./routes/orderRoutes";
 import passwordResetRouter from "./routes/passwordResetRoutes";
 import productRouter from "./routes/productRoutes";
-import {
-  default as reminderRouter,
-  default as reviewRouter,
-} from "./routes/reminderRoutes";
+import reminderRouter from "./routes/reminderRoutes";
+import reviewRouter from "./routes/reviewRoutes";
 import subscribeRouter from "./routes/subscribeRoutes";
 import userRouter from "./routes/userRoutes";
 import authRouter from "./routes/authRoutes";
+import globalErrorHandling from "./controllers/errorController";
+
 const app = express();
 //? Middleware
 app.use(
@@ -31,13 +30,15 @@ app.use(
     crossOriginResourcePolicy: { policy: "cross-origin" }, // Set the correct policy here
   })
 );
+
+app.use(cors());
+app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, "dist")));
-app.use("/upload", express.static(path.join("./../public")));
-app.use(express.static(path.resolve("./public")));
+app.use(express.static(path.join(__dirname, "./../public")));
 
 app.use("/api/v1/orders", orderRouter);
 
@@ -66,5 +67,7 @@ app.use("/api/v1/reminder", reminderRouter);
 app.use("/api/v1/review", reviewRouter);
 
 app.use("/api/v1/discount", discountRouter);
+
+app.use(globalErrorHandling);
 
 export default app;
