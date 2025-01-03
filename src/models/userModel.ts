@@ -1,5 +1,5 @@
 import mongoose, { InferSchemaType, model } from "mongoose";
-import bcryptjs from "bcryptjs";
+import bcrypt from "bcrypt";
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -22,7 +22,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      select: false,
     },
     isAdmin: {
       type: Boolean,
@@ -39,23 +38,24 @@ const userSchema = new mongoose.Schema(
     },
     subscribe_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Subscribe",
     },
+    isReminder: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true }
 );
-
-export type UserType = InferSchemaType<typeof userSchema>;
-
+type UserType = InferSchemaType<typeof userSchema>;
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
-  this.password = await bcryptjs.hash(this.password, 8);
+  if (this.isModified("password")) {
+    this.password = await bcrypt.hash(this.password, 8);
+  }
   next();
 });
-
 async function comparePassword(this: UserType, enteredPassword: string) {
-  return await bcryptjs.compare(enteredPassword, this.password);
+  return await bcrypt.compare(enteredPassword, this.password);
 }
 userSchema.methods.comparePassword = comparePassword;
 
@@ -64,7 +64,6 @@ async function toFrontend(this: UserType) {
   return this;
 }
 userSchema.methods.toFrontend = toFrontend;
-
 export const User = model<
   UserType & {
     comparePassword: typeof comparePassword;
