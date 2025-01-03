@@ -1,6 +1,20 @@
-import mongoose, { InferSchemaType } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
+import  { InferSchemaType } from "mongoose";
 
-const subscribeSchema = new mongoose.Schema(
+export interface ISubscribe extends Document {
+  title: string;
+  image: string;
+  price: string;
+  isFreeDelivery?: boolean;
+  discount?: string;
+  features: string[];
+  deliveryFrequency: string;
+  deliveryCount: string;
+  users_id?: mongoose.Types.ObjectId[];
+}
+
+
+const subscribeSchema = new Schema<ISubscribe>(
   {
     title: {
       type: String,
@@ -12,7 +26,7 @@ const subscribeSchema = new mongoose.Schema(
       required: true,
     },
     price: {
-      type: Number,
+      type: String,
       required: true,
     },
     isFreeDelivery: {
@@ -20,9 +34,9 @@ const subscribeSchema = new mongoose.Schema(
       default: true,
     },
     discount: {
-      type: Number,
+      type: String,
     },
-    fetures: {
+    features: {
       type: [String],
       required: true,
     },
@@ -31,7 +45,7 @@ const subscribeSchema = new mongoose.Schema(
       required: true,
     },
     deliveryCount: {
-      type: Number,
+      type: String,
       required: true,
     },
     users_id: {
@@ -41,5 +55,7 @@ const subscribeSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+
 export type subscribeType = InferSchemaType<typeof subscribeSchema>;
 export default mongoose.model<subscribeType>("Subscribe", subscribeSchema);

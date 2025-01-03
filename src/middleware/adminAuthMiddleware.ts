@@ -10,6 +10,7 @@ export const adminAuthMiddleware = async (
   next: NextFunction
 ) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
+  
   if (!token) {
     res.status(401).json({ msg: "No token, authorization denied" });
   }
