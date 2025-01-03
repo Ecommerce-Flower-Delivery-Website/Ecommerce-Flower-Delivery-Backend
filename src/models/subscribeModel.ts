@@ -3,12 +3,12 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface ISubscribe extends Document {
   title: string;
   image: string;
-  price: number;
+  price: string;
   isFreeDelivery?: boolean;
-  discount?: number;
+  discount?: string;
   features: string[];
   deliveryFrequency: string;
-  deliveryCount: number;
+  deliveryCount: string;
   users_id?: mongoose.Types.ObjectId[];
 }
 
@@ -25,7 +25,7 @@ const subscribeSchema = new Schema<ISubscribe>(
       required: true,
     },
     price: {
-      type: Number,
+      type: String,
       required: true,
     },
     isFreeDelivery: {
@@ -33,7 +33,7 @@ const subscribeSchema = new Schema<ISubscribe>(
       default: true,
     },
     discount: {
-      type: Number,
+      type: String,
     },
     features: {
       type: [String],
@@ -44,7 +44,7 @@ const subscribeSchema = new Schema<ISubscribe>(
       required: true,
     },
     deliveryCount: {
-      type: Number,
+      type: String,
       required: true,
     },
     users_id: {
