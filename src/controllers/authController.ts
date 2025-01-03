@@ -1,33 +1,16 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { createToken } from "../lib/jwt";
 import { validateSchemas } from "../validation/userValidation";
 import { User } from "../models/userModel";
+import { sendResponse } from "@/utils/helpers";
 
-export const register = async (req: Request, res: Response) => {
-  const { success, error, data } = await validateSchemas.signup.safeParseAsync(
-    req.body
-  );
-  if (error) {
-    res.status(400).json({
-      message: error.errors[0].message,
-      user: null,
-      token: null,
-    });
-    return;
-  }
-  if (success) {
-    const existedUser = await User.findOne({
-      email: data.email,
-    });
-
-    if (existedUser) {
-      res.status(400).json({
-        message: "User already exists",
-        user: null,
-        token: null,
-      });
-      return;
-    }
+export const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const data = await validateSchemas.signup.parseAsync(req.body);
 
     const user = await User.create({ ...data, isAdmin: false });
     const token = createToken({
@@ -35,96 +18,95 @@ export const register = async (req: Request, res: Response) => {
       email: user.email,
     });
 
-    res.status(200).json({
-      message: "Signed up successfully",
-      token,
-      user: await user.toFrontend(),
+    sendResponse(res, 200, {
+      status: "success",
+      data: {
+        user: await user.toFrontend(),
+        token,
+      },
     });
-    return;
+  } catch (error) {
+    next(error);
   }
 };
 
-export const login = async (req: Request, res: Response) => {
-  const { success, error, data } = await validateSchemas.login.safeParseAsync(
-    req.body
-  );
-  if (error) {
-    res.status(400).json({
-      message: error.errors[0].message,
-      user: null,
-      token: null,
-    });
-    return;
-  }
-  if (success) {
-    const user = await User.findOne({
-      email: data.email,
-    });
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const data = await validateSchemas.login.parseAsync(req.body);
+
+    const user = await User.findOne({ email: data.email });
     if (!user) {
-      res
-        .status(404)
-        .json({ message: "User doesn't exists", user: null, token: null });
-      return;
+      return sendResponse(res, 404, {
+        status: "fail",
+        message: `User doesn't exists`,
+      });
     }
     const isAuth = await user.comparePassword(data.password);
     if (!isAuth) {
-      res.status(401).json({
-        message: "invalid user name or password",
-        user: null,
-        token: null,
+      return sendResponse(res, 401, {
+        status: "fail",
+        message: `invalid user name or password`,
       });
-      return;
     }
     const token = createToken({
       id: user._id,
       email: user.email,
     });
-    res.status(200).json({
-      message: "login successfully",
-      token,
-      user: await user.toFrontend(),
+
+    sendResponse(res, 200, {
+      status: "success",
+      data: {
+        user: await user.toFrontend(),
+        token,
+      },
     });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const login_admin = async (req: Request, res: Response) => {
-  const { success, error, data } = await validateSchemas.login.safeParseAsync(
-    req.body
-  );
-  if (error) {
-    res.status(400).json({
-      message: error.errors[0].message,
-      user: null,
-      token: null,
-    });
-    return;
-  }
-  if (success) {
+export const login_admin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const data = await validateSchemas.login.parseAsync(req.body);
+
     const user = await User.findOne({
       email: data.email,
       isAdmin: true,
     });
     if (!user) {
-      res
-        .status(404)
-        .json({ message: "User doesn't exists", user: null, token: null });
-      return;
+      return sendResponse(res, 404, {
+        status: "fail",
+        message: `User doesn't exists`,
+      });
     }
     const isAuth = await user.comparePassword(data.password);
     if (!isAuth) {
-      res.status(401).json({
-        message: "invalid credential",
+      return sendResponse(res, 401, {
+        status: "fail",
+        message: `invalid credential`,
       });
-      return;
     }
     const token = createToken({
       id: user._id,
       email: user.email,
     });
-    res.status(200).json({
-      message: "login successfully",
-      token,
-      user: await user.toFrontend(),
+
+    sendResponse(res, 200, {
+      status: "success",
+      data: {
+        user: await user.toFrontend(),
+        token,
+      },
     });
+  } catch (error) {
+    next(error);
   }
 };
