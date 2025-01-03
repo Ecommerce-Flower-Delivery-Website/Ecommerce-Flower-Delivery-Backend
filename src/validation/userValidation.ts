@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import z from "zod";
 
 const userNameZodSchema = z
@@ -15,10 +16,10 @@ const passwordZodSchema = (name = "password") =>
       required_error: `${name} is required`,
     })
     .min(8, `${name} cannot be less than 8 character `)
-    .max(24, `${name} cannot be more than 24 character `)
-    .refine((value) => {
-      return /(?=.*[A-Z])(?=.*\d)/.test(value);
-    }, `${name} must have at least one capital and one number`);
+    .max(24, `${name} cannot be more than 24 character `);
+// .refine((value) => {
+//   return /(?=.*[A-Z])(?=.*\d)/.test(value);
+// }, `${name} must have at least one capital and one number`);
 
 const userEmailSchema = z
   .string({
@@ -27,26 +28,26 @@ const userEmailSchema = z
   })
   .email("email is required");
 
+const userPhoneZodSchema = z.string().min(6).max(24);
+
 export const validateSchemas = {
-  signup: z
-    .object({
-      name: userNameZodSchema,
-      email: userEmailSchema,
-      phone: z.string().min(6).max(24),
-      role: z.string().default("user"),
-      password: passwordZodSchema(),
-      password_confirmation: passwordZodSchema("password confirmation"),
-    })
-    .refine(
-      (data: { password: string; password_confirmation: string }) =>
-        data.password === data.password_confirmation,
-      {
-        message: "Passwords don't match",
-        path: ["password_confirmation"],
-      }
-    ),
+  signup: z.object({
+    name: userNameZodSchema,
+    email: userEmailSchema,
+    phone: userPhoneZodSchema,
+    role: z.string().default("user"),
+    password: passwordZodSchema(),
+  }),
   login: z.object({
     email: userEmailSchema,
     password: passwordZodSchema(),
   }),
 };
+
+export const userUpdateSchema = z.object({
+  name: userNameZodSchema.optional(),
+  email: userEmailSchema.optional(),
+  phone: userPhoneZodSchema.optional(),
+  password: passwordZodSchema().optional(),
+  subscribe_id: z.string().optional(),
+});

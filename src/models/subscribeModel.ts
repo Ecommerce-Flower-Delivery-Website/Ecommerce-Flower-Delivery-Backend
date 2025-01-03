@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import  { InferSchemaType } from "mongoose";
 
 export interface ISubscribe extends Document {
   title: string;
@@ -55,6 +56,6 @@ const subscribeSchema = new Schema<ISubscribe>(
   { timestamps: true }
 );
 
-const Subscribe = mongoose.model("Subscribe", subscribeSchema);
 
-export default Subscribe;
+export type subscribeType = InferSchemaType<typeof subscribeSchema>;
+export default mongoose.model<subscribeType>("Subscribe", subscribeSchema);

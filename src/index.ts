@@ -1,36 +1,51 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import app from "./app";
 import initSuperAdmin from "../src/utils/initAdmin";
-import { Server } from "http";
+import app from "./app";
+
+process.on("uncaughtException", (err) => {
+  console.log("UNCAUGHT EXCEPTION!");
+  if (err instanceof Error) {
+    console.log(err.message);
+    console.log(err.stack);
+  } else {
+    console.log(err);
+  }
+  console.log("Shutting down...");
+
+  server.close(() => {
+    process.exit(1);
+  });
+});
 
 dotenv.config();
 
-let server: Server | undefined;
 const PORT = process.env.PORT;
 
 mongoose
   .connect(process.env.DATABASE!)
   .then(() => {
     console.log("Connected to MongoDB");
-
+    // seeding();
     initSuperAdmin();
-
-    server = app.listen(PORT, () => {
-      console.log(`App running on port ${PORT}`);
-    });
   })
   .catch((error) => console.error("MongoDB connection error:", error));
 
-process.on("unhandledRejection", (err) => {
-  console.log(err);
-  console.log("UNHANDLED REJECTION! Shutting down...");
+const server = app.listen(PORT, () => {
+  console.log(`App running on port ${PORT}`);
+});
 
-  if (server) {
-    server.close(() => {
-      process.exit(1);
-    });
+process.on("unhandledRejection", (err) => {
+  console.log("UNHANDLED REJECTION!");
+  if (err instanceof Error) {
+    console.log(err.message);
+    console.log(err.stack);
   } else {
-    process.exit(1);
+    console.log(err);
   }
+  console.log("Shutting down...");
+
+  server.close(() => {
+    process.exit(1);
+  });
 });
