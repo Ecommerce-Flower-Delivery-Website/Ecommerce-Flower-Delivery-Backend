@@ -11,7 +11,7 @@ export default {
       const limit = parseInt(req.query.limit as string) || 10;
       const skip = (page - 1) * limit;
 
-      const contacts = await Contact.find().skip(skip).limit(limit);
+      const contacts = await Contact.find().skip(skip).limit(limit).populate('user_id');
 
       const totalContacts = await Contact.countDocuments();
       const totalPages = Math.ceil(totalContacts / limit);
