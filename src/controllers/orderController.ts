@@ -69,7 +69,7 @@ const OrdersController = {
         cart_id: validatedData.cart_id,
       });
       cartInfo.product_array = [];
-      cartInfo.save();
+      await cartInfo.save();
       sendResponse(res, 200, { status: "success", data: newOrder });
     } catch (error) {
       if (error instanceof ValidationError) {

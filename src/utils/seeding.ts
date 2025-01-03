@@ -10,7 +10,7 @@ export const seeding = async () => {
     image: "/",
     description: "lorem ipsum dolor sit amet",
   });
-  category.save();
+  await category.save();
   const accessory = await accessoryModel.create({
     title: "cover",
     image: "/",
@@ -31,14 +31,14 @@ export const seeding = async () => {
     category_id: category.id,
   });
   accessory.products_array.push(product._id);
-  accessory.save();
-  product.save();
+  await accessory.save();
+  await product.save();
   const cart = await cartModel.findById("677446d18d182f893d6fbfb8");
   if (!cart) return;
-  //@ts-expect-error asdasd
+  //@ts-expect-error type is not correctly implemented
   cart.product_array.push(product);
   cart.hasDiscount = true;
   cart.totalAmount = 900;
-  cart.save();
+  await cart.save();
   console.log("seeded successfully");
 };

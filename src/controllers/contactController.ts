@@ -63,7 +63,7 @@ export default {
         });
       }
       updatedContact.isChecked = !updatedContact.isChecked;
-      updatedContact.save();
+      await updatedContact.save();
       sendResponse(res, 200, { status: "success", data: updatedContact });
     } catch (error) {
       next(error);
