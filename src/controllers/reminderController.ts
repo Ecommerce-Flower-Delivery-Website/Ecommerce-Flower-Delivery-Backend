@@ -17,7 +17,7 @@ const ReminderController = {
     async addReminder(req: any, res: any) {
     const user = await User.findById(req.user?._id);
     if (!user) {
-        sendResponse(res, 404, { status: "fail", message: "user not found" });
+        return sendResponse(res, 404, { status: "fail", message: "user not found" });
     };
     user.isReminder = true;
     await user.save();
@@ -33,7 +33,7 @@ const ReminderController = {
     async removeReminder  (req: any, res: any) {
         const user = await User.findById(req.user?._id);
         if (!user) {
-            sendResponse(res, 404, { status: "fail", message: "user not found" });
+            return sendResponse(res, 404, { status: "fail", message: "user not found" });
         };
         user.isReminder = false;
         await user.save();
