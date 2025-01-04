@@ -5,7 +5,7 @@ export interface ISubscribe extends Document {
   title: string;
   image: string;
   price: string;
-  isFreeDelivery?: boolean;
+  isFreeDelivery?: string;
   discount?: string;
   features: string[];
   deliveryFrequency: string;
@@ -30,8 +30,8 @@ const subscribeSchema = new Schema<ISubscribe>(
       required: true,
     },
     isFreeDelivery: {
-      type: Boolean,
-      default: true,
+      type: String,
+      default: "0",
     },
     discount: {
       type: String,

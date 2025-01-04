@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { UserType } from "@/models/userModel";
 
 import Subscribe from "./../models/subscribeModel";
-import { validateCreateSubscribeSchema } from "../validation/subscribeValidation";
+import { validateCreateSubscribeSchema, validateUpdateSubscribeSchema } from "../validation/subscribeValidation";
 import { sendResponse } from "../utils/helpers";
 
 
@@ -87,9 +87,8 @@ export const getSubscribePlans = async (req : Request, res: Response,next:NextFu
   
     return sendResponse(res, 200, {
       status: "success",
-      data: {
-        subscribePlans,
-    },
+      data: subscribePlans,//the result will be as : data.data only
+    
     });
   }  
   catch(error){
@@ -114,7 +113,7 @@ if(image){
 }
 
 
-  await validateCreateSubscribeSchema.parseAsync(
+  await validateUpdateSubscribeSchema.parseAsync(
   req.body
 );
 
@@ -135,7 +134,7 @@ if(image){
       findSubscribePlan.discount =  req.body.discount;
 
       findSubscribePlan.features =  req.body.features;
-      findSubscribePlan.image =  `/public/upload/images/subscribe-plans/${ req.body.image}`;
+      findSubscribePlan.image =  req.body.image ?`/public/upload/images/subscribe-plans/${ req.body.image}`:`/public/upload/images/subscribe-plans/${ findSubscribePlan.image}`;
 
       const updatedSubscribePlan= await findSubscribePlan.save();
 
