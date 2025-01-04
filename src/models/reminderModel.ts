@@ -15,11 +15,7 @@ const reminderSchema = new mongoose.Schema(
     festivalDate: {
       type: Date,
       required: true,
-    },
-    users_id: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "User",
-    },
+    }
   },
   { timestamps: true }
 );

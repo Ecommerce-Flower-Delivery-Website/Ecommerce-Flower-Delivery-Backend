@@ -37,8 +37,13 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(express.static('public'));
 app.use(express.static(path.join(__dirname, "dist")));
-app.use(express.static(path.join(__dirname, "./../public")));
+app.use('/public', express.static(path.join(__dirname, './../public')));
+
+
+// app.use(express.static(path.join(__dirname, "dist")));
+// app.use(express.static(path.join(__dirname, "./../public")));
 
 app.use("/api/v1/orders", orderRouter);
 
