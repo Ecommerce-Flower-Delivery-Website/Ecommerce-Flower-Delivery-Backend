@@ -5,16 +5,34 @@ import { userUpdateSchema } from "@/validation/userValidation";
 
 const getUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const users = await User.find();
-    sendResponse(res, 200, { status: "success", data: users });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const users = await User.find().select("-password").skip(skip).limit(limit);
+
+    const totalUsers = await User.countDocuments();
+    const totalPages = Math.ceil(totalUsers / limit);
+
+    sendResponse(res, 200, {
+      status: "success",
+      data: {
+        users,
+        pagination: {
+          totalUsers,
+          totalPages,
+          currentPage: page,
+          pageSize: limit,
+        },
+      },
+    });
   } catch (error) {
     next(error);
   }
 };
-
 const getUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select("-password");
     if (!user) {
       return sendResponse(res, 404, {
         status: "fail",
