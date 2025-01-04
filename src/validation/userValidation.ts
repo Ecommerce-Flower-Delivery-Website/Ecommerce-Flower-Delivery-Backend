@@ -35,7 +35,7 @@ export const validateSchemas = {
     name: userNameZodSchema,
     email: userEmailSchema,
     phone: userPhoneZodSchema,
-    role: z.string().default("user"),
+    isAdmin: z.boolean().default(false),
     password: passwordZodSchema(),
   }),
   login: z.object({
