@@ -1,5 +1,5 @@
 import mongoose, { InferSchemaType, model } from "mongoose";
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -50,12 +50,12 @@ const userSchema = new mongoose.Schema(
 type UserType = InferSchemaType<typeof userSchema>;
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
-    this.password = await bcrypt.hash(this.password, 8);
+    this.password = await bcryptjs.hash(this.password, 8);
   }
   next();
 });
 async function comparePassword(this: UserType, enteredPassword: string) {
-  return await bcrypt.compare(enteredPassword, this.password);
+  return await bcryptjs.compare(enteredPassword, this.password);
 }
 userSchema.methods.comparePassword = comparePassword;
 
