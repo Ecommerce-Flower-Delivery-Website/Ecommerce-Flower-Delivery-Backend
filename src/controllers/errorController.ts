@@ -1,6 +1,7 @@
 import { sendResponse } from "@/utils/helpers";
 import { Request, Response, NextFunction } from "express";
 import { CastError } from "mongoose";
+import multer from "multer";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
 
@@ -15,8 +16,13 @@ const globalErrorHandling = (
       status: "fail",
       message: fromZodError(error).toString(),
     });
+  } else if (error instanceof multer.MulterError) {
+    // This is a Multer-specific error (like file validation failure)
+    return sendResponse(res, 400, {
+      status: "fail",
+      message: error.message, // Send error message from Multer
+    });
   }
-
   // Check for invalid ObjectId values (CastError) thrown by Mongoose
   else if (error.name === "CastError") {
     error = error as CastError;

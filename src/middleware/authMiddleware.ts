@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { verifyToken } from "../lib/jwt";
 import { User } from "../models/userModel";
+import { sendResponse } from "@/utils/helpers";
 
 export const authMiddleware = async (
   req: Request & {
@@ -11,19 +12,28 @@ export const authMiddleware = async (
 ) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   if (!token) {
-    res.status(401).json({ msg: "No token, authorization denied" });
+    return sendResponse(res, 401, {
+      status: "fail",
+      message: `No token, authorization denied`,
+    });
   }
   if (token) {
     try {
       const decoded = verifyToken(token) as { id: string };
       const user = await User.findById(decoded.id);
       if (!user) {
-        res.status(404).json({ msg: "User not found" });
+        return sendResponse(res, 404, {
+          status: "fail",
+          message: `User not found`,
+        });
       }
       req.user = user;
       next();
     } catch {
-      res.status(401).json({ msg: "Invalid token" });
+      sendResponse(res, 401, {
+        status: "fail",
+        message: `Invalid token`,
+      });
     }
   }
 };
