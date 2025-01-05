@@ -20,6 +20,7 @@ const productSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
+      required: true,
     },
     category_id: {
       type: mongoose.Schema.Types.ObjectId,

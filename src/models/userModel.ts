@@ -39,21 +39,23 @@ const userSchema = new mongoose.Schema(
     },
     subscribe_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Subscribe",
     },
+    isReminder: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true }
 );
-
-export type UserType = InferSchemaType<typeof userSchema>;
-
+type UserType = InferSchemaType<typeof userSchema>;
+export type { UserType };
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
-  this.password = await bcryptjs.hash(this.password, 8);
+  if (this.isModified("password")) {
+    this.password = await bcryptjs.hash(this.password, 8);
+  }
   next();
 });
-
 async function comparePassword(this: UserType, enteredPassword: string) {
   return await bcryptjs.compare(enteredPassword, this.password);
 }
@@ -64,7 +66,6 @@ async function toFrontend(this: UserType) {
   return this;
 }
 userSchema.methods.toFrontend = toFrontend;
-
 export const User = model<
   UserType & {
     comparePassword: typeof comparePassword;

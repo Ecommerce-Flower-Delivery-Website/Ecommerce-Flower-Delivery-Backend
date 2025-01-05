@@ -1,3 +1,130 @@
-import category from "../models/categoryModel";
+import { sendResponse } from "@/utils/helpers";
+import Category from "../models/categoryModel";
+import { NextFunction, Request, Response } from "express";
+import { addCategorySchema, editCategorySchema } from "@/validation/categoryValidation";
 
-export default {};
+const CategoryController = {
+    async getCategories(req: Request, res: Response, next: NextFunction) {
+        try {
+            const categories = await Category.find();
+
+            sendResponse(res, 200, {
+                status: "success",
+                data: {
+                    categories,
+                },
+            });
+        } catch (err) {
+            next(err);
+        }
+    },
+
+    async getCategory(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = req.params.id;
+
+            const category = await Category.findById(id);
+
+            if (!category) {
+                sendResponse(res, 404, {
+                    status: "fail",
+                    message: "Category not found",
+                });
+                return;
+            }
+
+            sendResponse(res, 200, {
+                status: "success",
+                data: {
+                    category,
+                },
+            });
+        } catch (err) {
+            next(err);
+        }
+    },
+
+    async addCategory(req: Request, res: Response, next: NextFunction) {
+        try {
+            await addCategorySchema.parseAsync(req.body);
+
+            const category = await Category.create({
+                title: req.body.title,
+                image: req.file
+                    ? `/public/upload/images/categories/${req.file.filename}`
+                    : null,
+                description: req.body.description,
+            });
+
+            res.status(201).json({
+                status: "success",
+                data: {
+                    category,
+                },
+            });
+        } catch (err) {
+            next(err);
+        }
+    },
+
+    async deleteCategory(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = req.params.id;
+
+            const findCategory = await Category.findById(id);
+            if (!findCategory) {
+                sendResponse(res, 404, {
+                    status: "fail",
+                    message: "Category not found",
+                });
+                return;
+            }
+
+            await Category.findByIdAndDelete(id);
+
+            sendResponse(res, 200, {
+                status: "success",
+                data: "Delete is done",
+            });
+        } catch (err) {
+            next(err);
+        }
+    },
+
+    async editCategory(req: Request, res: Response, next: NextFunction) {
+        try {
+            await editCategorySchema.parseAsync(req.body);
+
+            const id = req.params.id;
+
+            const category = await Category.findById(id);
+
+            if (!category) {
+                sendResponse(res, 404, {
+                    status: "fail",
+                    message: "Category not found",
+                });
+                return;
+            }
+
+            category.title = req.body.title ?? category.title;
+            category.description = req.body.description ?? category.description;
+            if (req.file) {
+                category.image = `/public/upload/images/categories/${req.file.filename}`;
+            }
+
+            const updatedCategory = await category.save();
+
+            res.status(200).json({
+                status: "success",
+                data: {
+                    updatedCategory,
+                },
+            });
+        } catch (err) {
+            next(err);
+        }
+    },
+};
+
+export default CategoryController;

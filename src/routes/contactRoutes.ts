@@ -4,7 +4,7 @@ import { authMiddleware } from "@/middleware/authMiddleware";
 import { adminAuthMiddleware } from "@/middleware/adminAuthMiddleware";
 
 const router = express.Router();
-router.post("/", authMiddleware, contactController.create);
+router.post("/", adminAuthMiddleware, contactController.create);
 router.get("/", contactController.getAll);
 router.put("/:id", adminAuthMiddleware, contactController.toggleCheck);
 router.delete("/:id", adminAuthMiddleware, contactController.delete);
