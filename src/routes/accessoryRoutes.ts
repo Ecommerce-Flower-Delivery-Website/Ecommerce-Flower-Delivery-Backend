@@ -6,6 +6,7 @@ import {
   getAllAccessoriesController,
   updateAccessoryController,
 } from "../controllers/accessoryController";
+import { adminAuthMiddleware } from "@/middleware/adminAuthMiddleware";
 
 const router = express.Router();
 
@@ -13,13 +14,13 @@ const router = express.Router();
 router
   .route("/")
   .get(getAllAccessoriesController)
-  .post(createAccessoryController);
+  .post(adminAuthMiddleware, createAccessoryController);
 
 //* /api/v1/accessory/:id
 router
   .route("/:id")
   .get(getAccessoryByIdController)
-  .put(updateAccessoryController)
-  .delete(deleteAccessoryController);
+  .put(adminAuthMiddleware, updateAccessoryController)
+  .delete(adminAuthMiddleware, deleteAccessoryController);
 
 export default router;
