@@ -1,6 +1,16 @@
 import express from "express";
-import reviewController from "./../controllers/reviewController";
+import * as reviwController from "./../controllers/reviewController";
+import { adminAuthMiddleware } from "../middleware/adminAuthMiddleware";
+import { authMiddleware } from "../middleware/authMiddleware";
 
-const router = express.Router();
+const reviewRouter = express.Router();
 
-export default router;
+
+reviewRouter.post("/",authMiddleware, reviwController.createReview )
+                    .get("/",reviwController.getReviews)
+
+reviewRouter.route("/:id")
+    .delete(adminAuthMiddleware,reviwController.deleteReview)
+    .put(adminAuthMiddleware,reviwController.editReview);
+
+export default reviewRouter;

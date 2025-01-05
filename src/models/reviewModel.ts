@@ -13,8 +13,8 @@ const reviewSchema = new mongoose.Schema(
       required: true,
     },
     shouldShow: {
-      type: Boolean,
-      default: false,
+      type: String,
+      default: "0",
     },
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
