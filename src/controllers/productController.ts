@@ -1,135 +1,139 @@
+import { sendResponse } from "@/utils/helpers";
 import Product from "./../models/productModel";
-import mongoose from "mongoose";
+import { NextFunction, Request, Response } from "express";
+import {
+  addProductSchema,
+  editeProductSchema,
+} from "@/validation/productValidation";
 
 const ProductController = {
-    async getProducts (req: Request, res: any) {
-        const products = await Product.find()
-        // .populate("accessory_id");
-        return res.status(200).json({
-            status: "success",
-            data: {
-                products,
-            },
-        })
-    },
-    async getProduct (req: any, res: any) {
-        const id = req.params.id;
-        if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(404).json({
-                status: "fail",
-                message: "Invalid product id",
-            });
-        }
-        const product = await Product.findById(id)
-        // .populate("accessory_id");
-        if (!product) {
-            return res.status(404).json({
-                status: "fail",
-                message: "Product not found",
-            });
-        }
-        return res.status(200).json({
-            status: "success",
-            data: {
-                product,
-            },
-        });
-    },
-    async addProduct (req: any, res: any) {
-        console.log(req.body);
-        console.log(req.file);
+  async getProducts(req: Request, res: Response, next: NextFunction) {
+    try {
+      const products = await Product.find();
 
-        const { title, description, stock, price } = req.body;
-        const image = req.file?.filename;
-
-        if (!title || !stock || !price) {
-            return res.status(404).json({
-                status: "fail",
-                message: "Please provide all required fields",
-            });
-        }
-        if (
-            typeof title !== "string" ||
-            typeof description !== "string" ||
-            typeof Number(stock) !== "number" ||
-            typeof Number(price) !== "number"
-        ) {
-            return res.status(404).json({
-                status: "fail",
-                message: "Invalid input type",
-            });
-        }
-        const product = await Product.create({
-            title,
-            description,
-            image: `/public/upload/images/products/${image}`,
-            stock,
-            price
-        });
-        return res.status(201).json({
-            status: "success",
-            data: {
-                product
-            },
-        });
-    },
-    async deleteProducts (req: any, res: any)  {
-        const id = req.params.id;
-        if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(404).json({
-                status: "fail",
-                message: "Invalid product id",
-            });
-        }
-        const findProduct = await Product.findById(id);
-        if (!findProduct) {
-            return res.status(404).json({
-                status: "fail",
-                message: "Product not found",
-            });
-        }
-        await Product.findByIdAndDelete(id);
-        return res.status(200).json({
-            status: "success",
-        });
-    },
-    async editProduct (req: any, res: any)  {
-        const id = req.params.id;
-        const { title, description, stock, price } = req.body;
-        if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(404).json({
-                status: "fail",
-                message: "Invalid product id",
-            });
-        }
-        const product = await Product.findById(id);
-        if (!product) {
-            return res.status(404).json({
-                status: "fail",
-                message: "Product not found",
-            });
-        }
-        if (title) {
-            product.title = title;
-        }
-        if (price) {
-            product.price = price;
-        }
-        if (stock) {
-            product.stock = stock;
-        }
-        if (description) {
-            product.description = description;
-        }
-        if (req.file) {
-            product.image = `/public/upload/images/products/${req.file.filename}`;
-        }
-        const updatedProduct = await product.save();
-        return res.status(200).json({
-            status: "success",
-            data: updatedProduct
-        });
+      sendResponse(res, 200, {
+        status: "success",
+        data: {
+          products,
+        },
+      });
+    } catch (err) {
+      next(err);
     }
-}
+  },
+  async getProduct(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id;
+
+      const product = await Product.findById(id);
+
+      if (!product) {
+        sendResponse(res, 404, {
+          status: "fail",
+          message: "Product not found",
+        });
+        return;
+      }
+      sendResponse(res, 200, {
+        status: "success",
+        data: {
+          product,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  async addProduct(req: Request, res: Response, next: NextFunction) {
+    try {
+      await addProductSchema.parseAsync(req.body);
+
+      const product = await Product.create({
+        title: req.body.title,
+        price: req.body.price,
+        stock: req.body.stock,
+        description: req.body.description,
+        priceAfterDiscount: req.body.priceAfterDiscount,
+        discount: req.body.discount,
+        quantity: req.body.quantity,
+        category_id: req.body.category_id,
+        accessory_id: req.body.accessory_id,
+        // Handle image upload
+        image: req.file
+          ? `/public/upload/images/products/${req.file.filename}`
+          : null,
+      });
+
+      res.status(201).json({
+        status: "success",
+        data: {
+          product,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  async deleteProducts(req: Request, res: Response, next: NextFunction) {
+    try {
+      const id = req.params.id;
+
+      const findProduct = await Product.findById(id);
+      if (!findProduct) {
+        sendResponse(res, 404, {
+          status: "fail",
+          message: "Product not found",
+        });
+        return;
+      }
+      await Product.findByIdAndDelete(id);
+      sendResponse(res, 200, {
+        status: "success",
+        data: "delete is done",
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+  async editProduct(req: Request, res: Response, next: NextFunction) {
+    try {
+      await editeProductSchema.parseAsync(req.body);
+      const id = req.params.id;
+
+      const product = await Product.findById(id);
+      if (!product) {
+        sendResponse(res, 404, {
+          status: "fail",
+          message: "Product not found",
+        });
+        return;
+      }
+
+      product.title = req.body.title ?? product.title;
+      product.price = req.body.price ?? product.price;
+      product.stock = req.body.stock ?? product.stock;
+      product.description = req.body.description ?? product.description;
+      product.priceAfterDiscount =
+        req.body.priceAfterDiscount ?? product.priceAfterDiscount;
+      product.discount = req.body.discount ?? product.discount;
+      product.quantity = req.body.quantity ?? product.quantity;
+      product.category_id = req.body.category_id ?? product.category_id;
+      product.accessory_id = req.body.accessory_id ?? product.accessory_id;
+      if (req.file) {
+        product.image = `/public/upload/images/products/${req.file.filename}`;
+      }
+
+      const updatedProduct = await product.save();
+      res.status(200).json({
+        status: "success",
+        data: {
+          updatedProduct,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+};
 
 export default ProductController;
