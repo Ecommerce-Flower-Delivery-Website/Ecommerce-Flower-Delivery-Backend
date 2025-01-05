@@ -3,6 +3,8 @@ import { sendResponse } from "@/utils/helpers";
 import Reminder from "./../models/reminderModel";
 import { User, UserType } from "@/models/userModel";
 import nodemailer from "nodemailer";
+import { reminderSchema } from "@/validation/reminderValidation";
+import { mailOptionsSchema } from "@/validation/sendEmailValidation";
 
 const transport = nodemailer.createTransport({
   host: "sandbox.smtp.mailtrap.io",
@@ -69,14 +71,15 @@ const ReminderController = {
     }
   },
   async sendEmail(req: Request, res: Response, next: NextFunction) {
-    const { to, subject, text, festivalName, festivalDate } = req.body;
-    if (!to || !subject || !text || !festivalDate || !festivalName) {
-      sendResponse(res, 404, {
-        status: "fail",
-        message: "please provide a valid data",
-      });
-    }
     try {
+      const { to, subject, text, festivalName, festivalDate } = req.body;
+
+      await reminderSchema.parseAsync({
+        text,
+        festivalName,
+        festivalDate,
+      });
+
       const customText = `
         Dear Customer,
 
@@ -88,6 +91,7 @@ const ReminderController = {
         Best regards,
         Flower Delivery Team
         `;
+
       const mailOptions = {
         from: "FlowerDelivery@company.com",
         to,
@@ -95,13 +99,15 @@ const ReminderController = {
         text: customText,
       };
 
-      const message = await Reminder.create({
+      await mailOptionsSchema.parseAsync(mailOptions);
+    
+      await Reminder.create({
         text,
         festivalName,
         festivalDate,
       });
 
-      const info = await transport.sendMail(mailOptions);
+      await transport.sendMail(mailOptions);
 
       sendResponse(res, 200, { status: "success", data: "" });
     } catch (error) {
