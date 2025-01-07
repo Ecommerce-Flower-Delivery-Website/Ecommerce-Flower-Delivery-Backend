@@ -1,7 +1,6 @@
+import { adminAuthMiddleware } from "@/middleware/adminAuthMiddleware";
 import express from "express";
 import contactController from "./../controllers/contactController";
-import { authMiddleware } from "@/middleware/authMiddleware";
-import { adminAuthMiddleware } from "@/middleware/adminAuthMiddleware";
 
 const router = express.Router();
 router.post("/", adminAuthMiddleware, contactController.create);
