@@ -9,13 +9,13 @@ import {
 const ProductController = {
   async getProducts(req: Request, res: Response, next: NextFunction) {
     try {
-      const products = await Product.find();
+      const products = await Product.find().populate("category_id");
 
       sendResponse(res, 200, {
         status: "success",
         data: {
           products,
-        },
+        },  
       });
     } catch (err) {
       next(err);
