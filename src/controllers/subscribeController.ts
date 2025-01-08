@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { UserType } from "@/models/userModel";
+import { User, UserType } from "@/models/userModel";
 
 import Subscribe from "./../models/subscribeModel";
 import { validateCreateSubscribeSchema, validateUpdateSubscribeSchema } from "../validation/subscribeValidation";
 import { sendResponse } from "../utils/helpers";
+import mongoose, { Document } from 'mongoose';
 
 
 
@@ -63,6 +64,19 @@ export const deleteSubscribePlan = async (req: Request & { user?: UserType }, re
               message: 'Subscribe Plan not found'
             });
           }
+
+          if(findSubscribePlan?.users_id)
+            if(findSubscribePlan?.users_id?.length >0){
+              for (const userId of findSubscribePlan.users_id) {
+                const user_had_of_this_plan= await User.findById(userId);
+
+                if(user_had_of_this_plan) {
+                user_had_of_this_plan.subscribe_id=null;
+                await user_had_of_this_plan.save();  
+                }
+
+              }
+            }
           
           await Subscribe.findByIdAndDelete(id);
           return sendResponse(res, 200, {
@@ -79,17 +93,54 @@ export const deleteSubscribePlan = async (req: Request & { user?: UserType }, re
 export const getSubscribePlans = async (req : Request, res: Response,next:NextFunction) => {
 
   try{
-    const subscribePlans = await Subscribe.find()
-    .populate({
-      path: "users_id",
-      select: "-password",
-    });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    //page =-1 mean : get all results 
+    if(page===-1){
+
+      const subscribePlans = await Subscribe.find()
+      .populate({
+        path: "users_id",
+        select: "-password",
+      });
+        
+      return sendResponse(res, 200, {
+        status: "success",
+        data: {
+          subscribePlans
+        },
+      
+      });
+    }else{
+      const subscribePlans = await Subscribe.find()
+      .populate({
+        path: "users_id",
+        select: "-password",
+      }).skip(skip).limit(limit);
   
-    return sendResponse(res, 200, {
-      status: "success",
-      data: subscribePlans,//the result will be as : data.data only
+      const totalPlans = await Subscribe.countDocuments();
+      const totalPages = Math.ceil(totalPlans / limit);
+      
     
-    });
+      return sendResponse(res, 200, {
+        status: "success",
+        data: {
+          subscribePlans,
+          pagination: {
+            totalPlans,
+            totalPages,
+            currentPage: page,
+            pageSize: limit,
+          },
+  
+        },
+      
+      });
+    }
+
+   
   }  
   catch(error){
 
@@ -148,6 +199,87 @@ if(image){
 
     next(error)
   }
+
+
+}
+
+export const getSubscribePlan = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const subscribePlan = await Subscribe.findById(req.params.id).populate({
+      path: "users_id",
+      select: "-password",
+    });
+
+    if (!subscribePlan) {
+      return sendResponse(res, 404, {
+        status: "fail",
+        message: `Subscribe Plan  with ID "${req.params.id}" not found.`,
+      });
+    }
+    sendResponse(res, 200, { status: "success", data: subscribePlan });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addUserToPlan = async (req: Request & { user?: UserType  }, res: Response,next:NextFunction)=>{
+
+  try{
+    const id = req.params.id;
+  
+    const findSubscribePlan = await Subscribe.findById(id);
+        if (!findSubscribePlan) {
+          return sendResponse(res, 404, {
+            status: "fail",
+            message: 'Subscribe Plan not found'
+          });
+        }
+    
+        const user = req.user as UserType & Document & { _id: mongoose.Types.ObjectId };
+        
+        if (!user) {
+      return sendResponse(res, 404, {
+        status: "fail",
+        message: "User not found",
+      });
+    }
+    
+    if (user?.subscribe_id) {
+
+        const isUserExisted = await Subscribe.findById(user.subscribe_id);
+
+        if(isUserExisted){
+          return sendResponse(res, 409, {
+            status: "fail",
+            message:"User already exists in this plan!"
+          });
+        }
+
+      //user no have plan yet
+      }else{
+
+        if(findSubscribePlan.users_id){
+        findSubscribePlan.users_id.push(user._id);
+        await findSubscribePlan.save();
+
+        user.subscribe_id = findSubscribePlan._id as mongoose.Types.ObjectId;
+        await user.save();
+
+        }
+      }
+
+        // const subscribePlan = await Subscribe.create(req.body);
+        return sendResponse(res, 201, {
+          status: "success",
+          data:findSubscribePlan
+        });
+
+  }catch(error){
+
+    next(error)
+  }
+    
+
 
 
 }

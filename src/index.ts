@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import initSuperAdmin from "../src/utils/initAdmin";
 import app from "./app";
+import { seeding } from "./utils/seeding";
 
 process.on("uncaughtException", (err) => {
   console.log("UNCAUGHT EXCEPTION!");
