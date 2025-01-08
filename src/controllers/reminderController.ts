@@ -3,6 +3,8 @@ import { sendResponse } from "@/utils/helpers";
 import Reminder from "./../models/reminderModel";
 import { User, UserType } from "@/models/userModel";
 import nodemailer from "nodemailer";
+import { reminderSchema } from "@/validation/reminderValidation";
+import { mailOptionsSchema } from "@/validation/sendEmailValidation";
 
 const transport = nodemailer.createTransport({
   host: "sandbox.smtp.mailtrap.io",
@@ -110,6 +112,7 @@ const ReminderController = {
       });
 
       sendResponse(res, 200, { status: "success", data: "Emails sent successfully" });
+
     } catch (error) {
       next(error);
     }

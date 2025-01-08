@@ -107,6 +107,7 @@ export const login_admin = async (
       },
     });
   } catch (error) {
+    console.log(error,"error")
     next(error);
   }
 };

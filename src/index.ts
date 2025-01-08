@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import initSuperAdmin from "../src/utils/initAdmin";
 import app from "./app";
+import { seeding } from "./utils/seeding";
 
 process.on("uncaughtException", (err) => {
   console.log("UNCAUGHT EXCEPTION!");
@@ -22,9 +23,8 @@ dotenv.config();
 
 const PORT = process.env.PORT;
 
-mongoose
-  // .connect(process.env.DATABASE!)
-  .connect("mongodb://localhost:27017/EcommerceFlowerDeliveryWebsite")
+mongoose.connect(process.env.DATABASE!)
+  // .connect("mongodb://localhost:27017/EcommerceFlowerDeliveryWebsite")
   .then(() => {
     console.log("Connected to MongoDB");
     // seeding();
