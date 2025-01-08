@@ -42,9 +42,7 @@ const ReminderController = {
     res: Response,
     next: NextFunction
   ) {
-    const reminderUsers = await User.find({ isReminder: true }).select(
-      "-password"
-    );
+    const reminderUsers = await User.find({ isReminder: true }).select("name email phone");
     if (!reminderUsers) {
       sendResponse(res, 404, { status: "fail", message: "user not found" });
     }
@@ -71,48 +69,54 @@ const ReminderController = {
     }
   },
   async sendEmail(req: Request, res: Response, next: NextFunction) {
-    try {
-      const { to, subject, text, festivalName, festivalDate } = req.body;
+    const { subject, text, festivalName, festivalDate } = req.body;
+    const mailList = await User.find({ isReminder: true }).select("email -_id");
 
-      await reminderSchema.parseAsync({
-        text,
-        festivalName,
-        festivalDate,
+    if (!subject || !text || !festivalDate || !festivalName) {
+      return sendResponse(res, 404, {
+        status: "fail",
+        message: "Please provide valid data",
+      });
+    }
+
+    try {
+      const customHtml = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+      <h2 style="color: #4CAF50;">Dear Customer,</h2>
+      <p>We are excited to inform you about the upcoming festival:</p>
+      <h3 style="color: #FF5722;">${festivalName}</h3>
+      <p><strong>Date:</strong> ${festivalDate}</p>
+      <p>${text}</p>
+      <br>
+      <p>Best regards,</p>
+      <p><strong>Flower Delivery Team</strong></p>
+    </div>
+  `;
+
+      const promise = mailList.map(mail => {
+        const mailOptions = {
+          from: "FlowerDelivery@company.com",
+          to: mail.email, 
+          subject,
+          html: customHtml, 
+        };
+        return transport.sendMail(mailOptions);
       });
 
-      const customText = `
-        Dear Customer,
+      await Promise.all(promise);
 
-        We are excited to inform you about the upcoming festival: ${festivalName}.
-        Date: ${festivalDate}.
-
-        ${text}
-
-        Best regards,
-        Flower Delivery Team
-        `;
-
-      const mailOptions = {
-        from: "FlowerDelivery@company.com",
-        to,
-        subject,
-        text: customText,
-      };
-
-      await mailOptionsSchema.parseAsync(mailOptions);
-    
       await Reminder.create({
         text,
         festivalName,
         festivalDate,
       });
 
-      await transport.sendMail(mailOptions);
+      sendResponse(res, 200, { status: "success", data: "Emails sent successfully" });
 
-      sendResponse(res, 200, { status: "success", data: "" });
     } catch (error) {
       next(error);
     }
+
   },
 };
 
