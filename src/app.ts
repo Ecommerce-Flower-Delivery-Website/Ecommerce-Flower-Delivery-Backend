@@ -17,6 +17,7 @@ import subscribeRouter from "./routes/subscribeRoutes";
 import userRouter from "./routes/userRoutes";
 import authRouter from "./routes/authRoutes";
 import globalErrorHandling from "./controllers/errorController";
+import multer from "multer";
 
 const app = express();
 //? Middleware
@@ -35,13 +36,18 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(express.static('public'));
+app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "dist")));
-app.use('/public', express.static(path.join(__dirname, './../public')));
-
+app.use("/public", express.static(path.join(__dirname, "./../public")));
 
 // app.use(express.static(path.join(__dirname, "dist")));
 // app.use(express.static(path.join(__dirname, "./../public")));
+
+const upload = multer({ dest: "uploads/" });
+app.post("/api/upload", upload.single("image"), (req, res) => {
+  console.log(req.file)
+  res.status(200).json(req.file);
+});
 
 app.use("/api/v1/orders", orderRouter);
 
