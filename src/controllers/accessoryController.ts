@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 import Accessory from "../models/accessoryModel"; // Adjust the path based on your project structure
 import { ZodError } from "zod";
-import { accessorySchema, updateAccessorySchema } from "../validation/accessoryValidation";
+import {
+  accessorySchema,
+  updateAccessorySchema,
+} from "../validation/accessoryValidation";
 import { Types } from "mongoose";
 
 /**
@@ -28,7 +31,8 @@ export const getAllAccessoriesController = async (
     const accessories = await Accessory.find()
       .skip((page - 1) * ACCESSORIES_PER_PAGE)
       .limit(ACCESSORIES_PER_PAGE)
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .populate("products_array");
 
     res.status(200).json({
       message: "Accessories received",
@@ -56,16 +60,23 @@ export const createAccessoryController = async (
 ): Promise<void> => {
   try {
     //? Validate request body with Zod schema
-    const parsedBody = accessorySchema.parse(req.body);
+    // await accessorySchema.parse(req.body);
 
-    //* Create a new Accessory instance
-    const newAccessory = new Accessory(parsedBody);
-
-    //* Save the new accessory to the database
-    const savedAccessory = await newAccessory.save();
+    const accessory = await Accessory.create({
+      title: req.body.title,
+      price: Number(req.body.price),
+      stock: Number(req.body.stock),
+      description: req.body.description,
+      image: req.file
+        ? `/public/upload/images/accessories/${req.file.filename}`
+        : null,
+    });
 
     //* Respond with the saved accessory
-    res.status(201).json(savedAccessory);
+    res.status(201).json({
+      status: "success",
+      data: accessory
+    });
   } catch (err) {
     if (err instanceof ZodError) {
       //! Handle Zod validation errors
