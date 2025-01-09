@@ -5,12 +5,13 @@ import { authMiddleware } from "../middleware/authMiddleware";
 
 const reviewRouter = express.Router();
 
+reviewRouter
+  .post("/", reviwController.createReview)
+  .get("/", reviwController.getReviews);
 
-reviewRouter.post("/",authMiddleware, reviwController.createReview )
-                    .get("/",reviwController.getReviews)
-
-reviewRouter.route("/:id")
-    .delete(adminAuthMiddleware,reviwController.deleteReview)
-    .put(adminAuthMiddleware,reviwController.editReview);
+reviewRouter
+  .route("/:id")
+  .delete(reviwController.deleteReview)
+  .put(reviwController.editReview);
 
 export default reviewRouter;

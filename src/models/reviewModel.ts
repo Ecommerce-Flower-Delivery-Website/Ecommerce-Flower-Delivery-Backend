@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { boolean } from "zod";
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -13,13 +14,8 @@ const reviewSchema = new mongoose.Schema(
       required: true,
     },
     shouldShow: {
-      type: String,
-      default: "0",
-    },
-    user_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
