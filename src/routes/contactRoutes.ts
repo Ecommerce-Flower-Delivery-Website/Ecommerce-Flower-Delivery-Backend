@@ -3,9 +3,9 @@ import express from "express";
 import contactController from "./../controllers/contactController";
 
 const router = express.Router();
-router.post("/", adminAuthMiddleware, contactController.create);
+router.post("/",  contactController.create);
 router.get("/", contactController.getAll);
-router.put("/:id", adminAuthMiddleware, contactController.toggleCheck);
-router.delete("/:id", adminAuthMiddleware, contactController.delete);
+router.put("/:id",  contactController.toggleCheck);
+router.delete("/:id",  contactController.delete);
 
 export default router;
