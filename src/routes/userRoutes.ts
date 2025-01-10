@@ -5,12 +5,12 @@ import { authMiddleware } from "@/middleware/authMiddleware";
 
 const router = express.Router();
 
-router.get("/", adminAuthMiddleware, userController.getUsers);
+router.get("/",  userController.getUsers);
 
-router.get("/:id", adminAuthMiddleware, userController.getUser);
+router.get("/:id",  userController.getUser);
 
-router.patch("/:id", adminAuthMiddleware, userController.updateUser);
+router.patch("/:id",  userController.updateUser);
 
-router.delete("/:id", adminAuthMiddleware, userController.deleteUser);
+router.delete("/:id",  userController.deleteUser);
 
 export default router;

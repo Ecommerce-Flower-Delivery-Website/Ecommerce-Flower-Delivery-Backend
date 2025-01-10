@@ -9,7 +9,7 @@ import {
 const ProductController = {
   async getProducts(req: Request, res: Response, next: NextFunction) {
     try {
-      const products = await Product.find().populate("category_id");
+      const products = await Product.find(); //.populate("category_id");
 
       sendResponse(res, 200, {
         status: "success",
@@ -46,7 +46,7 @@ const ProductController = {
   },
   async addProduct(req: Request, res: Response, next: NextFunction) {
     try {
-      await addProductSchema.parseAsync(req.body);
+      await addProductSchema.parseAsync(req.body);      
 
       const product = await Product.create({
         title: req.body.title,
@@ -70,7 +70,7 @@ const ProductController = {
           product,
         },
       });
-    } catch (err) {
+    } catch (err) {      
       next(err);
     }
   },

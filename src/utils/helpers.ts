@@ -1,4 +1,5 @@
 import { Response } from "express";
+import mongoose from "mongoose";
 
 // Input type
 type SuccessResponse = {
