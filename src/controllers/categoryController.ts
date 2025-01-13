@@ -38,7 +38,7 @@ const CategoryController = {
     try {
       const id = req.params.id;
 
-      const category = await Category.findById(id);
+      const category = await Category.findById(id).populate("products");
 
       if (!category) {
         sendResponse(res, 404, {

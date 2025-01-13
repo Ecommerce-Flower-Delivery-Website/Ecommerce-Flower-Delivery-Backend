@@ -1,5 +1,6 @@
 import { sendResponse } from "@/utils/helpers";
 import Product from "./../models/productModel";
+import Category from "./../models/categoryModel";
 import { NextFunction, Request, Response } from "express";
 import {
   addProductSchema,
@@ -9,13 +10,13 @@ import {
 const ProductController = {
   async getProducts(req: Request, res: Response, next: NextFunction) {
     try {
-      const products = await Product.find(); //.populate("category_id");
+      const products = await Product.find().populate("category_id");
 
       sendResponse(res, 200, {
         status: "success",
         data: {
           products,
-        },  
+        },
       });
     } catch (err) {
       next(err);
@@ -46,7 +47,15 @@ const ProductController = {
   },
   async addProduct(req: Request, res: Response, next: NextFunction) {
     try {
-      await addProductSchema.parseAsync(req.body);      
+      await addProductSchema.parseAsync(req.body);
+
+      const category = await Category.findById(req.body.category_id);
+      if (!category) {
+        return sendResponse(res, 404, {
+          status: "fail",
+          message: "Category not found",
+        });
+      }
 
       const product = await Product.create({
         title: req.body.title,
@@ -63,6 +72,8 @@ const ProductController = {
           ? `/public/upload/images/products/${req.file.filename}`
           : null,
       });
+      category.products.push(product._id);
+      await category.save();
 
       res.status(201).json({
         status: "success",
@@ -70,7 +81,7 @@ const ProductController = {
           product,
         },
       });
-    } catch (err) {      
+    } catch (err) {
       next(err);
     }
   },
