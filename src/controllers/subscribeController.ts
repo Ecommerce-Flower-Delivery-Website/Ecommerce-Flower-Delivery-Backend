@@ -2,128 +2,126 @@ import { NextFunction, Request, Response } from "express";
 import { User, UserType } from "@/models/userModel";
 
 import Subscribe from "./../models/subscribeModel";
-import { validateCreateSubscribeSchema, validateUpdateSubscribeSchema } from "../validation/subscribeValidation";
-import { sendResponse } from "../utils/helpers";
-import mongoose, { Document } from 'mongoose';
+import {
+  validateCreateSubscribeSchema,
+  validateUpdateSubscribeSchema,
+} from "../validation/subscribeValidation";
+import { sendResponse } from "../utils/sendResponse";
+import mongoose, { Document } from "mongoose";
 
-
-
-export const createSubscribePlan = async (req: Request & { user?: UserType }, res: Response,next:NextFunction)=>{
-
-  try{
+export const createSubscribePlan = async (
+  req: Request & { user?: UserType },
+  res: Response,
+  next: NextFunction
+) => {
+  try {
     const image = req.file?.filename;
-    if(image){
-      req.body = {...req.body, image:`/public/upload/images/subscribe-plans/${image}`}
-    }else{
-      req.body = {...req.body, image:''}
+    if (image) {
+      req.body = {
+        ...req.body,
+        image: `/public/upload/images/subscribe-plans/${image}`,
+      };
+    } else {
+      req.body = { ...req.body, image: "" };
     }
 
+    await validateCreateSubscribeSchema.parseAsync(req.body);
 
-      await validateCreateSubscribeSchema.parseAsync(
-        req.body
-      );
+    const subscribePlan = await Subscribe.create(req.body);
+    return sendResponse(res, 201, {
+      status: "success",
+      data: subscribePlan,
+    });
 
+    // if (error) {
+    //   return sendResponse(res, 400, {
+    //     status: "error",
+    //     message: 'Invalid request data',
+    //     error: error.errors.map((issue) => ({
+    //       path: issue.path.join('.'),
+    //       message: issue.message
+    //     })),
 
-        const subscribePlan = await Subscribe.create(req.body);
-        return sendResponse(res, 201, {
-          status: "success",
-          data:subscribePlan
-        });
-
-
-      // if (error) {
-      //   return sendResponse(res, 400, {
-      //     status: "error",
-      //     message: 'Invalid request data',
-      //     error: error.errors.map((issue) => ({
-      //       path: issue.path.join('.'),
-      //       message: issue.message
-      //     })),
-
-      //   });
-      // }
-  }catch(error){
-
-    next(error)
+    //   });
+    // }
+  } catch (error) {
+    next(error);
   }
-    
+};
 
-
-
-}
-
-export const deleteSubscribePlan = async (req: Request & { user?: UserType }, res: Response,next:NextFunction)=>{
-  
-  try{
+export const deleteSubscribePlan = async (
+  req: Request & { user?: UserType },
+  res: Response,
+  next: NextFunction
+) => {
+  try {
     const id = req.params.id;
-  
-      const findSubscribePlan = await Subscribe.findById(id);
-          if (!findSubscribePlan) {
-            return sendResponse(res, 404, {
-              status: "fail",
-              message: 'Subscribe Plan not found'
-            });
+
+    const findSubscribePlan = await Subscribe.findById(id);
+    if (!findSubscribePlan) {
+      return sendResponse(res, 404, {
+        status: "fail",
+        message: "Subscribe Plan not found",
+      });
+    }
+
+    if (findSubscribePlan?.users_id)
+      if (findSubscribePlan?.users_id?.length > 0) {
+        for (const userId of findSubscribePlan.users_id) {
+          const user_had_of_this_plan = await User.findById(userId);
+
+          if (user_had_of_this_plan) {
+            user_had_of_this_plan.subscribe_id = undefined;
+            await user_had_of_this_plan.save();
           }
+        }
+      }
 
-          if(findSubscribePlan?.users_id)
-            if(findSubscribePlan?.users_id?.length >0){
-              for (const userId of findSubscribePlan.users_id) {
-                const user_had_of_this_plan= await User.findById(userId);
-
-                if(user_had_of_this_plan) {
-                user_had_of_this_plan.subscribe_id=null;
-                await user_had_of_this_plan.save();  
-                }
-
-              }
-            }
-          
-          await Subscribe.findByIdAndDelete(id);
-          return sendResponse(res, 200, {
-            status: "success",
-            data:"Delete Subscibe Plan is successfully"
-          });
-  }catch(error){
-    next(error)
+    await Subscribe.findByIdAndDelete(id);
+    return sendResponse(res, 200, {
+      status: "success",
+      data: "Delete Subscibe Plan is successfully",
+    });
+  } catch (error) {
+    next(error);
   }
-  
+};
 
-}
-
-export const getSubscribePlans = async (req : Request, res: Response,next:NextFunction) => {
-
-  try{
+export const getSubscribePlans = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    //page =-1 mean : get all results 
-    if(page===-1){
-
-      const subscribePlans = await Subscribe.find()
-      .populate({
+    //page =-1 mean : get all results
+    if (page === -1) {
+      const subscribePlans = await Subscribe.find().populate({
         path: "users_id",
         select: "-password",
       });
-        
+
       return sendResponse(res, 200, {
         status: "success",
         data: {
-          subscribePlans
+          subscribePlans,
         },
-      
       });
-    }else{
+    } else {
       const subscribePlans = await Subscribe.find()
-      .populate({
-        path: "users_id",
-        select: "-password",
-      }).skip(skip).limit(limit);
-  
+        .populate({
+          path: "users_id",
+          select: "-password",
+        })
+        .skip(skip)
+        .limit(limit);
+
       const totalPlans = await Subscribe.countDocuments();
       const totalPages = Math.ceil(totalPlans / limit);
-      
-    
+
       return sendResponse(res, 200, {
         status: "success",
         data: {
@@ -134,76 +132,70 @@ export const getSubscribePlans = async (req : Request, res: Response,next:NextFu
             currentPage: page,
             pageSize: limit,
           },
-  
         },
-      
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const editSubscribePlan = async (
+  req: Request & { user?: UserType },
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = req.params.id;
+
+    const image = req.file?.filename;
+    if (image) {
+      req.body = {
+        ...req.body,
+        image: `/public/upload/images/subscribe-plans/${image}`,
+      };
+    } else {
+      req.body = { ...req.body, image: "" };
+    }
+
+    await validateUpdateSubscribeSchema.parseAsync(req.body);
+
+    const findSubscribePlan = await Subscribe.findById(id);
+    if (!findSubscribePlan) {
+      return sendResponse(res, 404, {
+        status: "fail",
+        message: "Subscribe Plan not found",
       });
     }
 
-   
-  }  
-  catch(error){
+    findSubscribePlan.title = req.body.title;
+    findSubscribePlan.price = req.body.price;
+    findSubscribePlan.deliveryCount = req.body.deliveryCount;
+    findSubscribePlan.deliveryFrequency = req.body.deliveryFrequency;
+    findSubscribePlan.isFreeDelivery = req.body.isFreeDelivery;
+    findSubscribePlan.discount = req.body.discount;
 
-    next(error)
+    findSubscribePlan.features = req.body.features;
+    findSubscribePlan.image = req.body.image
+      ? `/public/upload/images/subscribe-plans/${req.body.image}`
+      : `/public/upload/images/subscribe-plans/${findSubscribePlan.image}`;
+
+    const updatedSubscribePlan = await findSubscribePlan.save();
+
+    return sendResponse(res, 201, {
+      status: "success",
+      data: updatedSubscribePlan,
+    });
+  } catch (error) {
+    next(error);
   }
-  
-  
-
 };
 
-export const editSubscribePlan = async (req: Request & { user?: UserType }, res: Response,next:NextFunction)=>{
-
-  try{
-const id = req.params.id;
-
-const image = req.file?.filename;
-if(image){
-  req.body = {...req.body, image:`/public/upload/images/subscribe-plans/${image}`}
-}else{
-  req.body = {...req.body, image:''}
-}
-
-
-  await validateUpdateSubscribeSchema.parseAsync(
-  req.body
-);
-
-    const findSubscribePlan = await Subscribe.findById(id);
-        if (!findSubscribePlan) {
-          return sendResponse(res, 404, {
-            status: "fail",
-            message: 'Subscribe Plan not found'
-          });
-    }
-
-
-      findSubscribePlan.title =  req.body.title;
-      findSubscribePlan.price =  req.body.price;
-      findSubscribePlan.deliveryCount =  req.body.deliveryCount;
-      findSubscribePlan.deliveryFrequency =  req.body.deliveryFrequency;
-      findSubscribePlan.isFreeDelivery =  req.body.isFreeDelivery;
-      findSubscribePlan.discount =  req.body.discount;
-
-      findSubscribePlan.features =  req.body.features;
-      findSubscribePlan.image =  req.body.image ?`/public/upload/images/subscribe-plans/${ req.body.image}`:`/public/upload/images/subscribe-plans/${ findSubscribePlan.image}`;
-
-      const updatedSubscribePlan= await findSubscribePlan.save();
-
-        return sendResponse(res, 201, {
-          status: "success",
-          data: updatedSubscribePlan
-        });
-
-  } 
-  catch(error){
-
-    next(error)
-  }
-
-
-}
-
-export const getSubscribePlan = async (req: Request, res: Response, next: NextFunction) => {
+export const getSubscribePlan = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const subscribePlan = await Subscribe.findById(req.params.id).populate({
       path: "users_id",
@@ -222,64 +214,59 @@ export const getSubscribePlan = async (req: Request, res: Response, next: NextFu
   }
 };
 
-export const addUserToPlan = async (req: Request & { user?: UserType  }, res: Response,next:NextFunction)=>{
-
-  try{
+export const addUserToPlan = async (
+  req: Request & { user?: UserType },
+  res: Response,
+  next: NextFunction
+) => {
+  try {
     const id = req.params.id;
-  
+
     const findSubscribePlan = await Subscribe.findById(id);
-        if (!findSubscribePlan) {
-          return sendResponse(res, 404, {
-            status: "fail",
-            message: 'Subscribe Plan not found'
-          });
-        }
-    
-        const user = req.user as UserType & Document & { _id: mongoose.Types.ObjectId };
-        
-        if (!user) {
+    if (!findSubscribePlan) {
+      return sendResponse(res, 404, {
+        status: "fail",
+        message: "Subscribe Plan not found",
+      });
+    }
+
+    const user = req.user as UserType &
+      Document & { _id: mongoose.Types.ObjectId };
+
+    if (!user) {
       return sendResponse(res, 404, {
         status: "fail",
         message: "User not found",
       });
     }
-    
+
     if (user?.subscribe_id) {
+      const isUserExisted = await Subscribe.findById(user.subscribe_id);
 
-        const isUserExisted = await Subscribe.findById(user.subscribe_id);
-
-        if(isUserExisted){
-          return sendResponse(res, 409, {
-            status: "fail",
-            message:"User already exists in this plan!"
-          });
-        }
+      if (isUserExisted) {
+        return sendResponse(res, 409, {
+          status: "fail",
+          message: "User already exists in this plan!",
+        });
+      }
 
       //user no have plan yet
-      }else{
-
-        if(findSubscribePlan.users_id){
+    } else {
+      if (findSubscribePlan.users_id) {
         findSubscribePlan.users_id.push(user._id);
         await findSubscribePlan.save();
 
         user.subscribe_id = findSubscribePlan._id as mongoose.Types.ObjectId;
         await user.save();
-
-        }
       }
+    }
 
-        // const subscribePlan = await Subscribe.create(req.body);
-        return sendResponse(res, 201, {
-          status: "success",
-          data:findSubscribePlan
-        });
-
-  }catch(error){
-
-    next(error)
+    // const subscribePlan = await Subscribe.create(req.body);
+    return sendResponse(res, 201, {
+      status: "success",
+      data: findSubscribePlan,
+    });
+  } catch (error) {
+    next(error);
   }
-    
-
-
-
-}
+};

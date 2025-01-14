@@ -7,19 +7,18 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(authMiddleware, productController.getProducts)
+  .get( productController.getProducts)
   .post(
-    adminAuthMiddleware,
     upload.single("image"),
     productController.addProduct
   );
 
 router
   .route("/:id")
-  .get(authMiddleware, productController.getProduct)
-  .delete(adminAuthMiddleware, productController.deleteProducts)
+  .get(productController.getProduct)
+  .delete( productController.deleteProducts)
   .put(
-    adminAuthMiddleware,
+    
     upload.single("image"),
     productController.editProduct
   );

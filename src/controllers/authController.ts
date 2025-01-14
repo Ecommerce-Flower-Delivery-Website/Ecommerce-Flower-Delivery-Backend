@@ -2,7 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { createToken } from "../lib/jwt";
 import { validateSchemas } from "../validation/userValidation";
 import { User } from "../models/userModel";
-import { sendResponse } from "@/utils/helpers";
+import { sendResponse } from "@/utils/sendResponse";
+import cartModel from "@/models/cartModel";
 
 export const register = async (
   req: Request,
@@ -17,6 +18,11 @@ export const register = async (
       id: user._id,
       email: user.email,
     });
+
+
+    await cartModel.create({
+      userId: user._id,
+    })
 
     sendResponse(res, 200, {
       status: "success",
@@ -107,7 +113,7 @@ export const login_admin = async (
       },
     });
   } catch (error) {
-    console.log(error,"error")
+    console.log(error, "error");
     next(error);
   }
 };

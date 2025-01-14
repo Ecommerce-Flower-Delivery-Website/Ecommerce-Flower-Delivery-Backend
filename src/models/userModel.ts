@@ -1,5 +1,6 @@
-import mongoose, { InferSchemaType, model } from "mongoose";
+import mongoose, { Document, InferSchemaType, model } from "mongoose";
 import bcryptjs from "bcryptjs";
+import { subscribeType } from "./subscribeModel";
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -44,11 +45,13 @@ const userSchema = new mongoose.Schema(
     isReminder: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   { timestamps: true }
 );
-type UserType = InferSchemaType<typeof userSchema>;
+type UserType = Document & InferSchemaType<typeof userSchema> & {
+  subscribe_id?: mongoose.Types.ObjectId | subscribeType;
+};
 export type { UserType };
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
@@ -79,3 +82,4 @@ export default mongoose.model<
     toFrontend: typeof toFrontend;
   }
 >("User", userSchema);
+

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import User from "./../models/userModel";
-import { sendResponse } from "@/utils/helpers";
+import { sendResponse } from "@/utils/sendResponse";
 import { userUpdateSchema } from "@/validation/userValidation";
 
 const getUsers = async (req: Request, res: Response, next: NextFunction) => {

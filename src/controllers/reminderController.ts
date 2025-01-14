@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { sendResponse } from "@/utils/helpers";
+import { sendResponse } from "@/utils/sendResponse";
 import Reminder from "./../models/reminderModel";
 import { User, UserType } from "@/models/userModel";
 import nodemailer from "nodemailer";
@@ -42,7 +42,9 @@ const ReminderController = {
     res: Response,
     next: NextFunction
   ) {
-    const reminderUsers = await User.find({ isReminder: true }).select("name email phone");
+    const reminderUsers = await User.find({ isReminder: true }).select(
+      "name email phone"
+    );
     if (!reminderUsers) {
       sendResponse(res, 404, { status: "fail", message: "user not found" });
     }
@@ -93,12 +95,12 @@ const ReminderController = {
     </div>
   `;
 
-      const promise = mailList.map(mail => {
+      const promise = mailList.map((mail) => {
         const mailOptions = {
           from: "FlowerDelivery@company.com",
-          to: mail.email, 
+          to: mail.email,
           subject,
-          html: customHtml, 
+          html: customHtml,
         };
         return transport.sendMail(mailOptions);
       });
@@ -111,12 +113,13 @@ const ReminderController = {
         festivalDate,
       });
 
-      sendResponse(res, 200, { status: "success", data: "Emails sent successfully" });
-
+      sendResponse(res, 200, {
+        status: "success",
+        data: "Emails sent successfully",
+      });
     } catch (error) {
       next(error);
     }
-
   },
 };
 
