@@ -39,39 +39,42 @@ const getCart = async (
     })
     .select("-__v -_id -userId").lean() as TCart | null;
 
-      if (!cart) {
-        return sendResponse(res, 404, {
-          status: "fail",
-          message: "cart is not found",
-        });
-      }
+     if (!cart) {
+      return sendResponse(res, 404, {
+        status: "fail",
+        message: "cart is not found",
+      });
+    }
 
-      const cartItems = cart.items;
-      const subscribe = user.subscribe_id as subscribeType | undefined;
+    const cartItems = cart.items;
+    const subscribe = user.subscribe_id as subscribeType | undefined;
+    let priceAll = 0, priceAllAfterDiscount = 0;
 
     for (let i = 0; i < cartItems.length; i++) {
       const item = cartItems[i];
       const productItem = item.productId as TProduct;
+      let priceElement = Number(productItem.price);
+      let priceElementAfterDiscount = Number(productItem.priceAfterDiscount);
       const accessoriesItem = item.accessoriesId as TAccessory[] | undefined;
-  
-      cart.items[i].price += Number(productItem.price);
-      cart.items[i].priceAfterDiscount += Number(productItem.priceAfterDiscount);
 
       if (accessoriesItem) {
         for (const accessory of accessoriesItem) {
-          cart.items[i].price += accessory.price;
-          cart.items[i].priceAfterDiscount += accessory.price; // Assuming no discount for accessories
+          priceElement += accessory.price;
+          priceElementAfterDiscount += accessory.price; // Assuming no discount for accessories
         }
       }
 
       if (subscribe && subscribe.discount) {
-        const productDiscountBySubscription  = cart.items[i].price - (cart.items[i].price * 100 / Number(subscribe.discount));
-        cart.items[i].priceAfterDiscount -= productDiscountBySubscription ;
+        const productDiscountBySubscription  = priceElement - (priceElement * 100 / Number(subscribe.discount));
+        priceElementAfterDiscount -= productDiscountBySubscription ;
       }
 
-      cart.priceAll += cart.items[i].price;
-      cart.priceAllAfterDiscount += cart.items[i].priceAfterDiscount;
+      priceAll += priceElement;
+      priceAllAfterDiscount += priceElementAfterDiscount;
     }
+
+    cart.priceAll = priceAll;
+    cart.priceAllAfterDiscount = priceAllAfterDiscount;
 
     return sendResponse(res, 200, {
       status: "success",

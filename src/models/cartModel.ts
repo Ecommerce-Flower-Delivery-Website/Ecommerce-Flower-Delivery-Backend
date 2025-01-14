@@ -21,24 +21,8 @@ const cartSchema = new mongoose.Schema(
           type: [mongoose.Schema.Types.ObjectId],
           ref: "Accessory",
         },
-        price: {
-          type: Number,
-          default: 0,
-        },
-        priceAfterDiscount: {
-          type: Number,
-          default: 0,
-        },
       },
     ],
-    priceAll: {
-      type: Number,
-      default: 0,
-    },
-    priceAllAfterDiscount: {
-      type: Number,
-      default: 0,
-    },
   },
   { timestamps: false }
 );
