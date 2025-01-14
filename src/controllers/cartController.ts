@@ -10,36 +10,39 @@ import { isProductFonud, validateIdSchema } from "@/utils/databaseHelpers";
 
 const getCart = async (
   req: Request & {
-    user?: UserType
+    user?: UserType;
   },
   res: Response,
   next: NextFunction
 ) => {
-  try { 
-     if (!req.user) {
-       return sendResponse(res, 401, {
-         status: "fail",
-         message: "Unauthorized: No user found",
-       });
-     }
+  try {
+    if (!req.user) {
+      return sendResponse(res, 401, {
+        status: "fail",
+        message: "Unauthorized: No user found",
+      });
+    }
 
-    const user = await User.findById(req.user._id).populate({
-      path: "subscribe_id",
-      select: "subscribe_id"
-    }).lean() as UserType;
+    const user = (await User.findById(req.user._id)
+      .populate({
+        path: "subscribe_id",
+        select: "subscribe_id",
+      })
+      .lean()) as UserType;
 
-    const cart = await Cart.findOne({ userId: req.user._id })
-    .populate({
-      path: "items.productId",
-      select: "price priceAfterDiscount"
-    })
-    .populate({
-      path: "items.accessoriesId",
-      select: "price"
-    })
-    .select("-__v -_id -userId").lean() as TCart | null;
+    const cart = (await Cart.findOne({ userId: req.user._id })
+      .populate({
+        path: "items.productId",
+        select: "price priceAfterDiscount title image -_id",
+      })
+      .populate({
+        path: "items.accessoriesId",
+        select: "price title image -_id",
+      })
+      .select("-__v -_id -userId")
+      .lean()) as TCart | null;
 
-     if (!cart) {
+    if (!cart) {
       return sendResponse(res, 404, {
         status: "fail",
         message: "cart is not found",
@@ -48,29 +51,40 @@ const getCart = async (
 
     const cartItems = cart.items;
     const subscribe = user.subscribe_id as subscribeType | undefined;
-    let priceAll = 0, priceAllAfterDiscount = 0;
+    let priceAll = 0,
+      priceAllAfterDiscount = 0;
 
     for (let i = 0; i < cartItems.length; i++) {
       const item = cartItems[i];
-      const productItem = item.productId as TProduct;
-      let priceElement = Number(productItem.price);
-      let priceElementAfterDiscount = Number(productItem.priceAfterDiscount);
-      const accessoriesItem = item.accessoriesId as TAccessory[] | undefined;
+      const product = item.productId as TProduct;
+      let priceCartItem = Number(product.price);
+      let priceCartItemAfterDiscount = Number(product.priceAfterDiscount);
 
-      if (accessoriesItem) {
-        for (const accessory of accessoriesItem) {
-          priceElement += accessory.price;
-          priceElementAfterDiscount += accessory.price; // Assuming no discount for accessories
+      const accessories = item.accessoriesId as TAccessory[] | undefined;
+
+      if (accessories) {
+        for (let j = 0; j < accessories.length; j++) {
+          priceCartItem += accessories[j].price;
+          priceCartItemAfterDiscount += accessories[j].price; // Assuming no discount for accessories
+          delete (cart.items[i].accessoriesId[j] as { price?: string }).price;
         }
       }
 
       if (subscribe && subscribe.discount) {
-        const productDiscountBySubscription  = priceElement - (priceElement * 100 / Number(subscribe.discount));
-        priceElementAfterDiscount -= productDiscountBySubscription ;
+        const productDiscountBySubscription =
+          priceCartItem - (priceCartItem * 100) / Number(subscribe.discount);
+        priceCartItemAfterDiscount -= productDiscountBySubscription;
       }
 
-      priceAll += priceElement;
-      priceAllAfterDiscount += priceElementAfterDiscount;
+      cart.items[i].price = priceCartItem;
+      cart.items[i].priceAfterDiscount = priceCartItemAfterDiscount;
+
+      priceAll += priceCartItem;
+      priceAllAfterDiscount += priceCartItemAfterDiscount;
+
+      delete (cart.items[i].productId as { price?: string }).price;
+      delete (cart.items[i].productId as { priceAfterDiscount?: string })
+        .priceAfterDiscount;
     }
 
     cart.priceAll = priceAll;
@@ -83,15 +97,15 @@ const getCart = async (
   } catch (err) {
     next(err);
   }
-}
+};
 
 const addElementToCart = async (
   req: Request & {
-    user?: UserType
+    user?: UserType;
   },
   res: Response,
   next: NextFunction
-) : Promise<void> => {
+): Promise<void> => {
   try {
     if (!req.user) {
       return sendResponse(res, 401, {
@@ -100,7 +114,7 @@ const addElementToCart = async (
       });
     }
 
-    const {productId, accessoriesId} = req.body;
+    const { productId, accessoriesId } = req.body;
     await addEelementToCartValidation.parseAsync(req.body);
 
     if (!isProductFonud(productId)) {
@@ -130,25 +144,24 @@ const addElementToCart = async (
 
     cart.items.push({
       productId,
-      accessoriesId
+      accessoriesId,
     });
 
     await cart.save();
 
     res.sendStatus(204);
-
-  } catch(err) {
-    next(err)
+  } catch (err) {
+    next(err);
   }
-}
+};
 
 const removeElementFromCart = async (
   req: Request & {
-    user?: UserType
+    user?: UserType;
   },
   res: Response,
   next: NextFunction
-) : Promise<void> => {
+): Promise<void> => {
   try {
     if (!req.user) {
       return sendResponse(res, 401, {
@@ -160,14 +173,13 @@ const removeElementFromCart = async (
     const productId = req.params.productId;
 
     await validateIdSchema("product id is not valid").parseAsync(productId);
-    
+
     if (!isProductFonud(productId)) {
       return sendResponse(res, 404, {
         status: "fail",
         message: "Product is not found",
       });
     }
-    
 
     const cart = await Cart.findOne({ userId: req.user._id });
 
@@ -176,9 +188,11 @@ const removeElementFromCart = async (
         status: "fail",
         message: "Cart is not found",
       });
-    }    
+    }
 
-    const itemIndex = cart.items.findIndex((item) => item.productId.toString() === productId);
+    const itemIndex = cart.items.findIndex(
+      (item) => item.productId.toString() === productId
+    );
 
     if (itemIndex === -1) {
       return sendResponse(res, 404, {
@@ -190,10 +204,9 @@ const removeElementFromCart = async (
     cart.items.splice(itemIndex, 1);
 
     await cart.save();
-    
-    res.sendStatus(204);
 
-  } catch (err) {    
+    res.sendStatus(204);
+  } catch (err) {
     next(err);
   }
 };
@@ -201,5 +214,5 @@ const removeElementFromCart = async (
 export default {
   getCart,
   addElementToCart,
-  removeElementFromCart
-}
+  removeElementFromCart,
+};

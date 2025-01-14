@@ -27,16 +27,17 @@ const cartSchema = new mongoose.Schema(
   { timestamps: false }
 );
 
-export type TCart =  Document & mongoose.InferSchemaType<typeof cartSchema> & {
-  userId: mongoose.Types.ObjectId | UserType;
-  items?: Array<{
-    productId: mongoose.Types.ObjectId | TProduct;
-    accessoriesId?: mongoose.Types.ObjectId[] | TAccessory[];
-    price?: number;
-    priceAfterDiscount?: number;
-  }>;
-  priceAll?: number;
-  priceAllAfterDiscount?: number;
-};
+export type TCart = Document &
+  mongoose.InferSchemaType<typeof cartSchema> & {
+    userId: mongoose.Types.ObjectId | UserType;
+    items?: Array<{
+      productId: mongoose.Types.ObjectId | TProduct;
+      accessoriesId?: mongoose.Types.ObjectId[] | TAccessory[];
+      price?: number;
+      priceAfterDiscount?: number;
+    }>;
+    priceAll?: number;
+    priceAllAfterDiscount?: number;
+  };
 
 export default mongoose.model("Cart", cartSchema);
