@@ -1,4 +1,4 @@
-import { sendResponse } from "@/utils/helpers";
+import { sendResponse } from "@/utils/sendResponse";
 import Product from "./../models/productModel";
 import { NextFunction, Request, Response } from "express";
 import {
@@ -15,7 +15,7 @@ const ProductController = {
         status: "success",
         data: {
           products,
-        },  
+        },
       });
     } catch (err) {
       next(err);
@@ -46,7 +46,7 @@ const ProductController = {
   },
   async addProduct(req: Request, res: Response, next: NextFunction) {
     try {
-      await addProductSchema.parseAsync(req.body);      
+      await addProductSchema.parseAsync(req.body);
 
       const product = await Product.create({
         title: req.body.title,
@@ -70,7 +70,7 @@ const ProductController = {
           product,
         },
       });
-    } catch (err) {      
+    } catch (err) {
       next(err);
     }
   },

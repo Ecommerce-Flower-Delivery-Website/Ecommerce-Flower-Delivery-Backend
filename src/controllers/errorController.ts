@@ -1,4 +1,4 @@
-import { sendResponse } from "@/utils/helpers";
+import { sendResponse } from "@/utils/sendResponse";
 import { Request, Response, NextFunction } from "express";
 import { CastError } from "mongoose";
 import multer from "multer";

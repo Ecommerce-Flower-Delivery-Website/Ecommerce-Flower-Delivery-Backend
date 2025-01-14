@@ -36,7 +36,10 @@ const productSchema = new mongoose.Schema(
       ref: "Accessory",
     },
   },
-  { timestamps: true }
+  { timestamps: false }
 );
+
+export type TProduct = Document & mongoose.InferSchemaType<typeof productSchema>;
+
 
 export default mongoose.model("Product", productSchema);
