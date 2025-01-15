@@ -50,13 +50,20 @@ const getCart = async (
     }
 
     const cartItems = cart.items;
-    const subscribe = user.subscribe_id as subscribeType | undefined;
+    const subscribe = user.subscribe_id as subscribeType | undefined | null;
     let priceAll = 0,
       priceAllAfterDiscount = 0;
 
     for (let i = 0; i < cartItems.length; i++) {
       const item = cartItems[i];
-      const product = item.productId as TProduct;
+
+      const product = item.productId as TProduct | null;
+      //if product removed by admin
+      if (!product) {
+        delete cart.items[i];
+        continue;
+      }
+
       let priceCartItem = Number(product.price);
       let priceCartItemAfterDiscount = Number(product.priceAfterDiscount);
 
@@ -64,6 +71,12 @@ const getCart = async (
 
       if (accessories) {
         for (let j = 0; j < accessories.length; j++) {
+          //if accessory removed by admin
+          if (!accessories[j]) {
+            delete cart.items[i].accessoriesId[j];
+            continue;
+          }
+
           priceCartItem += accessories[j].price;
           priceCartItemAfterDiscount += accessories[j].price; // Assuming no discount for accessories
           delete (cart.items[i].accessoriesId[j] as { price?: string }).price;
