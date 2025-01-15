@@ -25,7 +25,9 @@ const ProductController = {
     try {
       const id = req.params.id;
 
-      const product = await Product.findById(id);
+      const product = await Product.findById(id).populate(
+        "category_id accessory_id"
+      );
 
       if (!product) {
         sendResponse(res, 404, {
