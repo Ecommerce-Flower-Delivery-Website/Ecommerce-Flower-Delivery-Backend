@@ -57,5 +57,5 @@ const subscribeSchema = new Schema<ISubscribe>(
 );
 
 
-export type subscribeType = InferSchemaType<typeof subscribeSchema>;
+export type subscribeType = Document & InferSchemaType<typeof subscribeSchema>;
 export default mongoose.model<subscribeType>("Subscribe", subscribeSchema);

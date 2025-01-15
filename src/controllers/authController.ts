@@ -5,6 +5,7 @@ import { User, UserType } from "../models/userModel";
 import { sendResponse } from "@/utils/helpers";
 import { sendEmail } from "../utils/sendEmail";
 import CryptoJS from "crypto-js";
+import cartModel from "@/models/cartModel";
 
 /*
 1- create user
@@ -44,6 +45,11 @@ export const register = async (
     //   id: user._id,
     //   email: user.email,
     // });
+
+
+    await cartModel.create({
+      userId: user._id,
+    })
 
     sendResponse(res, 200, {
       status: "success",
@@ -240,7 +246,7 @@ export const login_admin = async (
       },
     });
   } catch (error) {
-    console.log(error,"error")
+    console.log(error, "error");
     next(error);
   }
 };

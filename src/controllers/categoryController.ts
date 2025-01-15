@@ -1,4 +1,4 @@
-import { sendResponse } from "@/utils/helpers";
+import { sendResponse } from "@/utils/sendResponse";
 import Category from "../models/categoryModel";
 import { NextFunction, Request, Response } from "express";
 import {

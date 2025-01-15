@@ -1,5 +1,4 @@
 import { Response } from "express";
-import mongoose from "mongoose";
 
 // Input type
 type SuccessResponse = {
@@ -49,5 +48,3 @@ export const sendResponse = (
 
   res.status(statusCode).json(response);
 };
-
-//

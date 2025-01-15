@@ -6,12 +6,12 @@ import { adminAuthMiddleware } from '@/middleware/adminAuthMiddleware';
 const router = express.Router();
 
 router.route("/")
-    .get(authMiddleware,reminderController.getReminders)
-    .post(authMiddleware, reminderController.addReminder)
-    .delete(authMiddleware, reminderController.removeReminder)
+    .get(reminderController.getReminders)
+    .post( reminderController.addReminder)
+    .delete( reminderController.removeReminder)
 
 router.route("/send-email")
-    .post(authMiddleware,reminderController.sendEmail)
+    .post(reminderController.sendEmail)
 
 
 export default router;

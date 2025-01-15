@@ -1,5 +1,5 @@
 import { UserType } from "@/models/userModel";
-import { sendResponse } from "@/utils/helpers";
+import { sendResponse } from "@/utils/sendResponse";
 import { NextFunction, Request, Response } from "express";
 import Contact from "./../models/contactModel";
 
@@ -48,20 +48,19 @@ export default {
       sendResponse(res, 201, { status: "success", data: newContact });
     } catch (error) {
       console.log(error);
-      
 
       next(error);
     }
   },
 
-    // create: async (req: Request, res: Response, next: NextFunction) => {
+  // create: async (req: Request, res: Response, next: NextFunction) => {
   //   try {
   //     // const user = req.user as UserType & { _id: string };
   //     const newContact = await Contact.create({ user_id: "6778e76e61e437e957a6b5ae" });
   //     sendResponse(res, 201, { status: "success", data: newContact });
   //   } catch (error) {
   //     console.log(error);
-      
+
   //     next(error);
   //   }
   // },
