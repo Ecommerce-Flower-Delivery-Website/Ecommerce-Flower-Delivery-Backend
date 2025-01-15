@@ -49,3 +49,4 @@ export const sendResponse = (
 
   res.status(statusCode).json(response);
 };
+

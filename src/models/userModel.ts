@@ -1,5 +1,7 @@
 import mongoose, { InferSchemaType, model } from "mongoose";
-import bcryptjs from "bcryptjs";
+// import bcryptjs from "bcryptjs";
+import CryptoJS from "crypto-js";
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -16,7 +18,6 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       trim: true,
-      required: true,
     },
     password: {
       type: String,
@@ -31,9 +32,10 @@ const userSchema = new mongoose.Schema(
     emailConfirmToken: {
       type: String,
     },
-    emailConfirmExpires: {
-      type: Date,
-    },
+    isAccountVerified: {
+      type:Boolean,
+      default: false,
+  },
     googleId: {
       type: String,
     },
@@ -52,12 +54,16 @@ type UserType = InferSchemaType<typeof userSchema>;
 export type { UserType };
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
-    this.password = await bcryptjs.hash(this.password, 8);
+   this.password=  CryptoJS.AES.encrypt(this.password,process.env.JWT_SECRET!).toString()
+    // this.password = await bcryptjs.hash(this.password, 8);
   }
   next();
 });
 async function comparePassword(this: UserType, enteredPassword: string) {
-  return await bcryptjs.compare(enteredPassword, this.password);
+  // return await bcryptjs.compare(enteredPassword, this.password);
+  const existedPassword = CryptoJS.AES.decrypt(this.password.toString(), process.env.JWT_SECRET!).toString(CryptoJS.enc.Utf8)
+
+  return (existedPassword===enteredPassword)
 }
 userSchema.methods.comparePassword = comparePassword;
 
