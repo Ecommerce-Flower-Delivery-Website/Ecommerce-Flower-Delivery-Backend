@@ -33,11 +33,11 @@ const getCart = async (
     const cart = (await Cart.findOne({ userId: req.user._id })
       .populate({
         path: "items.productId",
-        select: "price priceAfterDiscount title image -_id",
+        select: "price priceAfterDiscount title image",
       })
       .populate({
         path: "items.accessoriesId",
-        select: "price title image -_id",
+        select: "price title image",
       })
       .select("-__v -_id -userId")
       .lean()) as TCart | null;
