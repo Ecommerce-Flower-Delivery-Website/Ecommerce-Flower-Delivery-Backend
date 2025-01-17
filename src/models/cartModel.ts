@@ -34,10 +34,8 @@ export type TCart = Document &
       productId: mongoose.Types.ObjectId | TProduct;
       accessoriesId?: mongoose.Types.ObjectId[] | TAccessory[];
       price?: number;
-      priceAfterDiscount?: number;
     }>;
     priceAll?: number;
-    priceAllAfterDiscount?: number;
   };
 
 export default mongoose.model("Cart", cartSchema);
