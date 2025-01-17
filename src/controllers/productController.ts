@@ -1,4 +1,4 @@
-import { sendResponse } from "@/utils/helpers";
+import { sendResponse } from "@/utils/sendResponse";
 import Product from "./../models/productModel";
 import Category from "./../models/categoryModel";
 import { NextFunction, Request, Response } from "express";
@@ -26,7 +26,9 @@ const ProductController = {
     try {
       const id = req.params.id;
 
-      const product = await Product.findById(id);
+      const product = await Product.findById(id).populate(
+        "category_id accessory_id"
+      );
 
       if (!product) {
         sendResponse(res, 404, {
@@ -49,6 +51,7 @@ const ProductController = {
     try {
       await addProductSchema.parseAsync(req.body);
 
+
       const category = await Category.findById(req.body.category_id);
       if (!category) {
         return sendResponse(res, 404, {
@@ -56,6 +59,7 @@ const ProductController = {
           message: "Category not found",
         });
       }
+
 
       const product = await Product.create({
         title: req.body.title,

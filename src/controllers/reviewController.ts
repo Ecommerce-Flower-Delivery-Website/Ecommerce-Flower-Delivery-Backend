@@ -6,7 +6,7 @@ import {
   validateCreateReviewSchema,
   validateUpdateReviewSchema,
 } from "../validation/reviewValidation";
-import { sendResponse } from "../utils/helpers";
+import { sendResponse } from "../utils/sendResponse";
 
 export const createReview = async (
   req: Request & { user?: UserType & { _id: string } },
