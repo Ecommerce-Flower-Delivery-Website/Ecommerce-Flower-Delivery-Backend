@@ -52,7 +52,7 @@ app.use("/public", express.static(path.join(__dirname, "./../public")));
 
 const upload = multer({ dest: "uploads/" });
 app.post("/api/upload", upload.single("image"), (req, res) => {
-  console.log(req.file)
+  console.log(req.file);
   res.status(200).json(req.file);
 });
 
