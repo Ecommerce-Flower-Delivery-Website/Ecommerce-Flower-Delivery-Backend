@@ -51,7 +51,6 @@ const ProductController = {
     try {
       await addProductSchema.parseAsync(req.body);
 
-
       const category = await Category.findById(req.body.category_id);
       if (!category) {
         return sendResponse(res, 404, {
@@ -59,7 +58,6 @@ const ProductController = {
           message: "Category not found",
         });
       }
-
 
       const product = await Product.create({
         title: req.body.title,
@@ -128,9 +126,6 @@ const ProductController = {
       product.price = req.body.price ?? product.price;
       product.stock = req.body.stock ?? product.stock;
       product.description = req.body.description ?? product.description;
-      product.priceAfterDiscount =
-        req.body.priceAfterDiscount ?? product.priceAfterDiscount;
-      product.discount = req.body.discount ?? product.discount;
       product.quantity = req.body.quantity ?? product.quantity;
       product.category_id = req.body.category_id ?? product.category_id;
       product.accessory_id = req.body.accessory_id ?? product.accessory_id;

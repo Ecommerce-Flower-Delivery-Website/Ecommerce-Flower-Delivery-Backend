@@ -3,8 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { sendResponse } from "@/utils/sendResponse";
 import { TProduct } from "@/models/productModel";
 import { TAccessory } from "@/models/accessoryModel";
-import { subscribeType } from "@/models/subscribeModel";
-import { User, UserType } from "@/models/userModel";
+import { UserType } from "@/models/userModel";
 import { addEelementToCartValidation } from "@/validation/cartValidation";
 import { isProductFonud, validateIdSchema } from "@/utils/databaseHelpers";
 
@@ -23,23 +22,16 @@ const getCart = async (
       });
     }
 
-    const user = (await User.findById(req.user._id)
-      .populate({
-        path: "subscribe_id",
-        select: "subscribe_id",
-      })
-      .lean()) as UserType;
-
     const cart = (await Cart.findOne({ userId: req.user._id })
       .populate({
         path: "items.productId",
-        select: "price priceAfterDiscount title image",
+        select: "price title image",
       })
       .populate({
         path: "items.accessoriesId",
         select: "price title image",
       })
-      .select("-__v -_id -userId")
+      .select("-__v -userId")
       .lean()) as TCart | null;
 
     if (!cart) {
@@ -49,13 +41,10 @@ const getCart = async (
       });
     }
 
-    const cartItems = cart.items;
-    const subscribe = user.subscribe_id as subscribeType | undefined | null;
-    let priceAll = 0,
-      priceAllAfterDiscount = 0;
+    let priceAll = 0;
 
-    for (let i = 0; i < cartItems.length; i++) {
-      const item = cartItems[i];
+    for (let i = 0; i < cart.items.length; i++) {
+      const item = cart.items[i];
 
       const product = item.productId as TProduct | null;
       //if product removed by admin
@@ -63,12 +52,9 @@ const getCart = async (
         delete cart.items[i];
         continue;
       }
-
       let priceCartItem = Number(product.price);
-      let priceCartItemAfterDiscount = Number(product.priceAfterDiscount);
 
       const accessories = item.accessoriesId as TAccessory[] | undefined;
-
       if (accessories) {
         for (let j = 0; j < accessories.length; j++) {
           //if accessory removed by admin
@@ -76,32 +62,15 @@ const getCart = async (
             delete cart.items[i].accessoriesId[j];
             continue;
           }
-
           priceCartItem += accessories[j].price;
-          priceCartItemAfterDiscount += accessories[j].price; // Assuming no discount for accessories
-          delete (cart.items[i].accessoriesId[j] as { price?: string }).price;
         }
       }
 
-      if (subscribe && subscribe.discount) {
-        const productDiscountBySubscription =
-          priceCartItem - (priceCartItem * 100) / Number(subscribe.discount);
-        priceCartItemAfterDiscount -= productDiscountBySubscription;
-      }
-
       cart.items[i].price = priceCartItem;
-      cart.items[i].priceAfterDiscount = priceCartItemAfterDiscount;
-
       priceAll += priceCartItem;
-      priceAllAfterDiscount += priceCartItemAfterDiscount;
-
-      delete (cart.items[i].productId as { price?: string }).price;
-      delete (cart.items[i].productId as { priceAfterDiscount?: string })
-        .priceAfterDiscount;
     }
 
     cart.priceAll = priceAll;
-    cart.priceAllAfterDiscount = priceAllAfterDiscount;
 
     return sendResponse(res, 200, {
       status: "success",
