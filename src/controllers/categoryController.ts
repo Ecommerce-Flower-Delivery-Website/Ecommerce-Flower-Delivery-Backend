@@ -7,6 +7,19 @@ import {
 } from "@/validation/categoryValidation";
 
 const CategoryController = {
+  async getAllCategory(req: Request, res: Response, next : NextFunction){
+    try{
+      const categories = await Category.find();
+      sendResponse(res, 200, {
+        status: "success",
+        data: {
+          categories,
+        },
+      });
+    }catch(err){
+      next(err); 
+    }
+  },
   async getCategories(req: Request, res: Response, next: NextFunction) {
     try {
       const page = parseInt(req.query.page as string) || 1;
