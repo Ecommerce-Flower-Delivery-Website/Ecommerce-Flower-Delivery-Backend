@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import z from "zod";
 
 const userNameZodSchema = z
@@ -28,7 +27,7 @@ const userEmailSchema = z
   })
   .email("email is required");
 
-const userPhoneZodSchema = z.string().min(6).max(24);
+const userPhoneZodSchema = z.string().min(6).max(24).optional();
 
 export const validateSchemas = {
   signup: z.object({
@@ -51,3 +50,16 @@ export const userUpdateSchema = z.object({
   password: passwordZodSchema().optional(),
   subscribe_id: z.string().optional(),
 });
+
+
+
+export const validateVerifyCodeSchema =  z.object({
+  emailConfirmToken: z.string().trim().min(1, "Verification Code is required"),
+  email: z.string().trim().min(1, " Email is required"),
+
+  });
+
+  export const validateForgetPasswordSchema =  z.object({
+    email: z.string().trim().min(1, " Email is required"),
+
+    });

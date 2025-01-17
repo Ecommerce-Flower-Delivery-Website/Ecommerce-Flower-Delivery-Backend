@@ -2,8 +2,6 @@ import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema(
   {
-    priceAfterDiscount: { type: String, required: true },
-    discount: { type: String, required: false },
     quantity: { type: String, required: true },
     title: {
       type: String,
@@ -36,7 +34,10 @@ const productSchema = new mongoose.Schema(
       ref: "Accessory",
     },
   },
-  { timestamps: true }
+  { timestamps: false }
 );
+
+export type TProduct = Document &
+  mongoose.InferSchemaType<typeof productSchema>;
 
 export default mongoose.model("Product", productSchema);

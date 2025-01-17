@@ -27,7 +27,9 @@ const accessorySchema = new mongoose.Schema(
       ref: "Product",
     },
   },
-  { timestamps: true }
+  { timestamps: false }
 );
+
+export type TAccessory = Document & mongoose.InferSchemaType<typeof accessorySchema>;
 
 export default mongoose.model("Accessory", accessorySchema);

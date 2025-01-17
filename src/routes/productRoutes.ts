@@ -1,13 +1,16 @@
 import express from "express";
-import productController from "./../controllers/productController";
-import { authMiddleware } from "./../middleware/authMiddleware";
 import upload from "../middleware/productsPhotoUpload";
+import productController from "./../controllers/productController";
 import { adminAuthMiddleware } from "@/middleware/adminAuthMiddleware";
+import { authMiddleware } from "./../middleware/authMiddleware";
 const router = express.Router();
+
 
 router
   .route("/")
-  .get(authMiddleware, productController.getProducts)
+  .get(
+    // authMiddleware,
+     productController.getProducts)
   .post(
     // adminAuthMiddleware,
     upload.single("image"),
@@ -16,10 +19,14 @@ router
 
 router
   .route("/:id")
-  .get(authMiddleware, productController.getProduct)
-  .delete(adminAuthMiddleware, productController.deleteProducts)
+  .get(
+    // authMiddleware,
+     productController.getProduct)
+  .delete(
+    // adminAuthMiddleware, 
+    productController.deleteProducts)
   .put(
-    adminAuthMiddleware,
+    // adminAuthMiddleware,
     upload.single("image"),
     productController.editProduct
   );

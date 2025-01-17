@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { verifyToken } from "../lib/jwt";
 import { User } from "../models/userModel";
-import { sendResponse } from "@/utils/helpers";
+import { sendResponse } from "@/utils/sendResponse";
 
 export const authMiddleware = async (
   req: Request & {
@@ -21,12 +21,21 @@ export const authMiddleware = async (
     try {
       const decoded = verifyToken(token) as { id: string };
       const user = await User.findById(decoded.id);
+
       if (!user) {
         return sendResponse(res, 404, {
           status: "fail",
           message: `User not found`,
         });
       }
+
+      if(!user?.isAccountVerified){
+        return sendResponse(res, 203, {
+          status: "fail",
+          message: `Your email need to be verified`,
+        });
+      }
+
       req.user = user;
       next();
     } catch {

@@ -1,4 +1,4 @@
-import { sendResponse } from "@/utils/helpers";
+import { sendResponse } from "@/utils/sendResponse";
 import Product from "./../models/productModel";
 import Category from "./../models/categoryModel";
 import { NextFunction, Request, Response } from "express";
@@ -26,7 +26,9 @@ const ProductController = {
     try {
       const id = req.params.id;
 
-      const product = await Product.findById(id);
+      const product = await Product.findById(id).populate(
+        "category_id accessory_id"
+      );
 
       if (!product) {
         sendResponse(res, 404, {
@@ -155,9 +157,6 @@ const ProductController = {
       product.price = req.body.price ?? product.price;
       product.stock = req.body.stock ?? product.stock;
       product.description = req.body.description ?? product.description;
-      product.priceAfterDiscount =
-        req.body.priceAfterDiscount ?? product.priceAfterDiscount;
-      product.discount = req.body.discount ?? product.discount;
       product.quantity = req.body.quantity ?? product.quantity;
       product.category_id = req.body.category_id ?? product.category_id;
       product.accessory_id = req.body.accessory_id ?? product.accessory_id;

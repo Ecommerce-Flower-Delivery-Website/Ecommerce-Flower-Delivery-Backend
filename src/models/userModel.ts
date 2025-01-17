@@ -1,5 +1,9 @@
-import mongoose, { InferSchemaType, model } from "mongoose";
-import bcryptjs from "bcryptjs";
+// import bcryptjs from "bcryptjs";
+import CryptoJS from "crypto-js";
+
+import mongoose, { Document, InferSchemaType, model } from "mongoose";
+// import bcryptjs from "bcryptjs";
+import { subscribeType } from "./subscribeModel";
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -16,7 +20,6 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       trim: true,
-      required: true,
     },
     password: {
       type: String,
@@ -31,9 +34,10 @@ const userSchema = new mongoose.Schema(
     emailConfirmToken: {
       type: String,
     },
-    emailConfirmExpires: {
-      type: Date,
-    },
+    isAccountVerified: {
+      type:Boolean,
+      default: false,
+  },
     googleId: {
       type: String,
     },
@@ -44,20 +48,26 @@ const userSchema = new mongoose.Schema(
     isReminder: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   { timestamps: true }
 );
-type UserType = InferSchemaType<typeof userSchema>;
+type UserType = Document & InferSchemaType<typeof userSchema> & {
+  subscribe_id?: mongoose.Types.ObjectId | subscribeType;
+};
 export type { UserType };
 userSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
-    this.password = await bcryptjs.hash(this.password, 8);
+   this.password=  CryptoJS.AES.encrypt(this.password,process.env.JWT_SECRET!).toString()
+    // this.password = await bcryptjs.hash(this.password, 8);
   }
   next();
 });
 async function comparePassword(this: UserType, enteredPassword: string) {
-  return await bcryptjs.compare(enteredPassword, this.password);
+  // return await bcryptjs.compare(enteredPassword, this.password);
+  const existedPassword = CryptoJS.AES.decrypt(this.password.toString(), process.env.JWT_SECRET!).toString(CryptoJS.enc.Utf8)
+
+  return (existedPassword===enteredPassword)
 }
 userSchema.methods.comparePassword = comparePassword;
 
@@ -79,3 +89,4 @@ export default mongoose.model<
     toFrontend: typeof toFrontend;
   }
 >("User", userSchema);
+

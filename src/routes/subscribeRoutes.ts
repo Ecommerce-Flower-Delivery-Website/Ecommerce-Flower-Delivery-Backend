@@ -9,11 +9,11 @@ const subscribePlansRouter = express.Router();
 subscribePlansRouter.post("/",adminAuthMiddleware,upload.single('image'), subscribeController.createSubscribePlan )
                     .get("/",subscribeController.getSubscribePlans)
                     
-subscribePlansRouter.route("/:id")
+subscribePlansRouter.route("/:id",)
     .delete(adminAuthMiddleware,subscribeController.deleteSubscribePlan)
     .put(adminAuthMiddleware,upload.single('image'),subscribeController.editSubscribePlan)
     .get(subscribeController.getSubscribePlan)
-    .post(authMiddleware, subscribeController.addUserToPlan )
+    .post(authMiddleware,subscribeController.addUserToPlan )
 
     
 export default subscribePlansRouter;
