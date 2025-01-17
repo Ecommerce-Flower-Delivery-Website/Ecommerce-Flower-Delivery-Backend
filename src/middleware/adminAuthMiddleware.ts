@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { verifyToken } from "../lib/jwt";
 import { User } from "../models/userModel";
-import { sendResponse } from "@/utils/sendResponse";
+import { sendResponse } from "@/utils/helpers";
 
 export const adminAuthMiddleware = async (
   req: Request & {
@@ -35,13 +35,6 @@ export const adminAuthMiddleware = async (
           message: `you are not authorized`,
         });
       }
-      if(!user?.isAccountVerified){
-        return sendResponse(res, 203, {
-          status: "fail",
-          message: `Your email need to be verified`,
-        });
-      }
-
       req.user = user;
       next();
     } catch {
