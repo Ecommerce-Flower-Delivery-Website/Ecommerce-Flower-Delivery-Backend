@@ -9,7 +9,7 @@ router
   .route("/")
   .get(authMiddleware, productController.getProducts)
   .post(
-    adminAuthMiddleware,
+    // adminAuthMiddleware,
     upload.single("image"),
     productController.addProduct
   );
@@ -23,5 +23,8 @@ router
     upload.single("image"),
     productController.editProduct
   );
+
+router.route('/:id/relate')
+      .get(productController.getRelatedProducts)
 
 export default router;
