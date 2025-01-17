@@ -1,6 +1,14 @@
 import mongoose, { Schema, Document } from "mongoose";
 import  { InferSchemaType } from "mongoose";
 
+
+
+export interface IUserReference {
+  user: mongoose.Types.ObjectId; 
+  deliveryFrequency: string; 
+  deliveryCount: string; 
+}
+
 export interface ISubscribe extends Document {
   title: string;
   image: string;
@@ -8,10 +16,26 @@ export interface ISubscribe extends Document {
   isFreeDelivery?: string;
   discount?: string;
   features: string[];
-  deliveryFrequency: string;
-  deliveryCount: string;
-  users_id?: mongoose.Types.ObjectId[];
+  users_id?: IUserReference[]; 
 }
+
+
+
+const userReferenceSchema = new Schema<IUserReference>({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  deliveryFrequency: {
+    type: String,
+    required: true,
+  },
+  deliveryCount: {
+    type: String,
+    required: true,
+  },
+});
 
 
 const subscribeSchema = new Schema<ISubscribe>(
@@ -40,17 +64,9 @@ const subscribeSchema = new Schema<ISubscribe>(
       type: [String],
       required: true,
     },
-    deliveryFrequency: {
-      type: String,
-      required: true,
-    },
-    deliveryCount: {
-      type: String,
-      required: true,
-    },
+
     users_id: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "User",
+      type: [userReferenceSchema],
     },
   },
   { timestamps: true }

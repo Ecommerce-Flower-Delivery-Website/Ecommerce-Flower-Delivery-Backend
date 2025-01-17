@@ -4,6 +4,7 @@ import { User, UserType } from "@/models/userModel";
 import Subscribe from "./../models/subscribeModel";
 import {
   validateCreateSubscribeSchema,
+  validateCreateUserForSubscribeSchema,
   validateUpdateSubscribeSchema,
 } from "../validation/subscribeValidation";
 import { sendResponse } from "../utils/sendResponse";
@@ -68,7 +69,8 @@ export const deleteSubscribePlan = async (
     if (findSubscribePlan?.users_id)
       if (findSubscribePlan?.users_id?.length > 0) {
         for (const userId of findSubscribePlan.users_id) {
-          const user_had_of_this_plan = await User.findById(userId);
+
+          const user_had_of_this_plan = await User.findById(userId?.user);
 
           if (user_had_of_this_plan) {
             user_had_of_this_plan.subscribe_id = undefined;
@@ -113,7 +115,7 @@ export const getSubscribePlans = async (
     } else {
       const subscribePlans = await Subscribe.find()
         .populate({
-          path: "users_id",
+          path: "users_id.user",
           select: "-password",
         })
         .skip(skip)
@@ -170,8 +172,6 @@ export const editSubscribePlan = async (
 
     findSubscribePlan.title = req.body.title;
     findSubscribePlan.price = req.body.price;
-    findSubscribePlan.deliveryCount = req.body.deliveryCount;
-    findSubscribePlan.deliveryFrequency = req.body.deliveryFrequency;
     findSubscribePlan.isFreeDelivery = req.body.isFreeDelivery;
     findSubscribePlan.discount = req.body.discount;
 
@@ -198,7 +198,7 @@ export const getSubscribePlan = async (
 ) => {
   try {
     const subscribePlan = await Subscribe.findById(req.params.id).populate({
-      path: "users_id",
+      path: "users_id.user",
       select: "-password",
     });
 
@@ -222,6 +222,9 @@ export const addUserToPlan = async (
   try {
     const id = req.params.id;
 
+    const data = await validateCreateUserForSubscribeSchema.parseAsync(req.body);
+
+    
     const findSubscribePlan = await Subscribe.findById(id);
     if (!findSubscribePlan) {
       return sendResponse(res, 404, {
@@ -253,7 +256,13 @@ export const addUserToPlan = async (
       //user no have plan yet
     } else {
       if (findSubscribePlan.users_id) {
-        findSubscribePlan.users_id.push(user._id);
+        findSubscribePlan.users_id.push(
+          {
+          user:user._id,
+          deliveryFrequency:data.deliveryFrequency,
+          deliveryCount:data.deliveryCount
+          }
+        );
         await findSubscribePlan.save();
 
         user.subscribe_id = findSubscribePlan._id as mongoose.Types.ObjectId;

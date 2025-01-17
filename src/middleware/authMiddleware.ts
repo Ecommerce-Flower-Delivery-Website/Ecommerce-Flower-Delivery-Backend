@@ -21,12 +21,21 @@ export const authMiddleware = async (
     try {
       const decoded = verifyToken(token) as { id: string };
       const user = await User.findById(decoded.id);
+
       if (!user) {
         return sendResponse(res, 404, {
           status: "fail",
           message: `User not found`,
         });
       }
+
+      if(!user?.isAccountVerified){
+        return sendResponse(res, 203, {
+          status: "fail",
+          message: `Your email need to be verified`,
+        });
+      }
+
       req.user = user;
       next();
     } catch {
