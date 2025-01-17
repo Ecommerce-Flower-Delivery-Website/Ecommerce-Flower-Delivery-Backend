@@ -1,6 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { createToken } from "../lib/jwt";
-import { validateForgetPasswordSchema, validateSchemas, validateVerifyCodeSchema } from "../validation/userValidation";
+import {
+  validateForgetPasswordSchema,
+  validateSchemas,
+  validateVerifyCodeSchema,
+} from "../validation/userValidation";
 import { User, UserType } from "../models/userModel";
 import { sendResponse } from "@/utils/helpers";
 import { sendEmail } from "../utils/sendEmail";
@@ -30,26 +34,23 @@ export const register = async (
     user.emailConfirmToken = verifyCode.toString();
     await user.save();
 
-
-
-    // HTML template 
+    // HTML template
     const templateHTML = `
     <h1> Verfiy Your Email </h1>
     <p> The Verification Code is <span style="color: green; font-weight: bold;"> ${verifyCode} </span> </p>
-    `
+    `;
     //sending email to user
-    sendEmail(data.email,"Verfiy You Email",templateHTML);
-    //response 
+    sendEmail(data.email, "Verfiy You Email", templateHTML);
+    //response
 
     // const token = createToken({
     //   id: user._id,
     //   email: user.email,
     // });
 
-
     await cartModel.create({
       userId: user._id,
-    })
+    });
 
     sendResponse(res, 200, {
       status: "success",
@@ -62,7 +63,6 @@ export const register = async (
     next(error);
   }
 };
-
 
 //at login will resend the verification as long as the user?.isAccountVerified=false
 export const login = async (
@@ -81,7 +81,6 @@ export const login = async (
       });
     }
 
-
     const isAuth = await user.comparePassword(data.password);
     if (!isAuth) {
       return sendResponse(res, 401, {
@@ -91,24 +90,21 @@ export const login = async (
     }
 
     if (!user?.isAccountVerified) {
-      
-      if(!user?.emailConfirmToken){
-        
+      if (!user?.emailConfirmToken) {
         //Creating Verification Token of email and save it to DataBase :
-         const verifyCode = Math.floor(Math.random() * 90000) + 10000;
+        const verifyCode = Math.floor(Math.random() * 90000) + 10000;
 
-          user.emailConfirmToken = verifyCode.toString();
-          await user.save();
+        user.emailConfirmToken = verifyCode.toString();
+        await user.save();
 
-          
-        // HTML template 
+        // HTML template
         const templateHTML = `
         <h1> Verfiy Your Email </h1>
         <p> The Verification Code is <span style="color: green; font-weight: bold;"> ${verifyCode} </span> </p>
-        `
+        `;
         //sending email to user
-        sendEmail(data.email,"Verfiy You Email",templateHTML);
-        //response 
+        sendEmail(data.email, "Verfiy You Email", templateHTML);
+        //response
 
         //just info of user because still need verification ( without token )
         return sendResponse(res, 400, {
@@ -116,30 +112,25 @@ export const login = async (
           data: {
             user: await user.toFrontend(),
           },
-
         });
-
       }
-                
-        // HTML template 
-        const templateHTML = `
+
+      // HTML template
+      const templateHTML = `
         <h1> Verfiy Your Email </h1>
         <p> The Verification Code is <span style="color: green; font-weight: bold;"> ${user.emailConfirmToken} </span> </p>
-        `
-        //sending email to user
-        sendEmail(data.email,"Verfiy You Email",templateHTML);
-        //response 
+        `;
+      //sending email to user
+      sendEmail(data.email, "Verfiy You Email", templateHTML);
+      //response
 
-        //just info of user because still need verification ( without token )
-        return sendResponse(res, 400, {
-          status: "success",
-          data: {
-            user: await user.toFrontend(),
-          },
-
-        });
-
-
+      //just info of user because still need verification ( without token )
+      return sendResponse(res, 400, {
+        status: "success",
+        data: {
+          user: await user.toFrontend(),
+        },
+      });
     }
 
     const token = createToken({
@@ -159,7 +150,6 @@ export const login = async (
   }
 };
 
-//at login will resend the verification as long as the user?.isAccountVerified=false
 export const login_admin = async (
   req: Request,
   res: Response,
@@ -185,54 +175,6 @@ export const login_admin = async (
         message: `invalid credential`,
       });
     }
-
-    if (!user?.isAccountVerified) {
-      
-      if(!user?.emailConfirmToken){
-        
-        //Creating Verification Token of email and save it to DataBase :
-         const verifyCode = Math.floor(Math.random() * 90000) + 10000;
-
-          user.emailConfirmToken = verifyCode.toString();
-          await user.save();
-
-          
-        // HTML template 
-        const templateHTML = `
-        <h1> Verfiy Your Email </h1>
-        <p> The Verification Code is <span style="color: green; font-weight: bold;"> ${verifyCode} </span> </p>
-        `
-        //sending email to user
-        sendEmail(data.email,"Verfiy You Email",templateHTML);
-        //response 
-
-        sendResponse(res, 200, {
-          status: "success",
-          data: {
-            user: await user.toFrontend(),
-          },
-        });
-      }
-                
-        // HTML template 
-        const templateHTML = `
-        <h1> Verfiy Your Email </h1>
-        <p> The Verification Code is <span style="color: green; font-weight: bold;"> ${user.emailConfirmToken} </span> </p>
-        `
-        //sending email to user
-        sendEmail(data.email,"Verfiy You Email",templateHTML);
-        //response 
-
-    sendResponse(res, 200, {
-      status: "success",
-      data: {
-        user: await user.toFrontend(),
-      },
-    });
-
-
-    }
-    
     const token = createToken({
       id: user._id,
       email: user.email,
@@ -251,21 +193,16 @@ export const login_admin = async (
   }
 };
 
-
-//by this :  user?.isAccountVerified should be true or false by comapring 
+//by this :  user?.isAccountVerified should be true or false by comapring
 //So if success that mean user got all steps of login or register completed
 export const compareVerificationCode = async (
   req: Request & { user?: UserType },
   res: Response,
   next: NextFunction
-)=>{
+) => {
+  try {
+    const data = await validateVerifyCodeSchema.parseAsync(req.body);
 
-  try{
-    
-    const data = await validateVerifyCodeSchema.parseAsync(
-            req.body
-          );
-    
     const user = await User.findOne({ email: data.email });
     if (!user) {
       return sendResponse(res, 404, {
@@ -274,128 +211,133 @@ export const compareVerificationCode = async (
       });
     }
 
-        if(!data?.emailConfirmToken){
-          return sendResponse(res, 404, {
-            status: "fail",
-            message: `User does not have verification code to compare!`,
-          });
-        }
+    if (!data?.emailConfirmToken) {
+      return sendResponse(res, 404, {
+        status: "fail",
+        message: `User does not have verification code to compare!`,
+      });
+    }
 
-        if(user?.emailConfirmToken===data?.emailConfirmToken){
-         user.isAccountVerified=true;
-        await user.save();
-        }
+    if (user?.emailConfirmToken === data?.emailConfirmToken) {
+      user.isAccountVerified = true;
+      await user.save();
+    }
 
-        const token = createToken({
-          id: user._id,
-          email: user.email,
-        });
-        
-        return sendResponse(res, 200, {
-          status: "success",
-          data: {
-            user: await user.toFrontend(),
-            token
-          },
-        });
-      }
+    const token = createToken({
+      id: user._id,
+      email: user.email,
+    });
 
-  catch (error) {
-    console.log(error,"error")
+    return sendResponse(res, 200, {
+      status: "success",
+      data: {
+        user: await user.toFrontend(),
+        token,
+      },
+    });
+  } catch (error) {
+    console.log(error, "error");
     next(error);
   }
-
-}
+};
 
 //resend new verfiy
 export const resendCode = async (
-  req: Request ,
+  req: Request,
   res: Response,
   next: NextFunction
-)=>{
-try{
+) => {
+  try {
+    const data = await validateForgetPasswordSchema.parseAsync(req.body);
 
-  const data = await validateForgetPasswordSchema.parseAsync(req.body);
+    const user = await User.findOne({ email: data.email });
 
-  const user = await User.findOne({ email: data.email });
+    if (!user) {
+      return sendResponse(res, 404, {
+        status: "fail",
+        message: `User doesn't exists`,
+      });
+    }
 
-  if (!user) {
-    return sendResponse(res, 404, {
-      status: "fail",
-      message: `User doesn't exists`,
-    });
-  }
-
-
-//Creating Verification Token of email and save it to DataBase :
+    //Creating Verification Token of email and save it to DataBase :
     const verifyCode = Math.floor(Math.random() * 90000) + 10000;
 
     user.emailConfirmToken = verifyCode.toString();
     await user.save();
 
-    const {name,emailConfirmToken,isReminder,isAdmin,email,isAccountVerified} = user;
+    const {
+      name,
+      emailConfirmToken,
+      isReminder,
+      isAdmin,
+      email,
+      isAccountVerified,
+    } = user;
 
-
-
-    // HTML template 
+    // HTML template
     const templateHTML = `
     <h1> New Verfiy Your Email </h1>
     <p> The New Verification Code is <span style="color: green; font-weight: bold;"> ${verifyCode} </span> </p>
-    `
+    `;
     //sending email to user
-    sendEmail(user.email,"New Verfiy You Email",templateHTML);
-
+    sendEmail(user.email, "New Verfiy You Email", templateHTML);
 
     sendResponse(res, 200, {
       status: "success",
-      data: {user:{name,email,emailConfirmToken,isReminder,isAdmin,isAccountVerified}}
+      data: {
+        user: {
+          name,
+          email,
+          emailConfirmToken,
+          isReminder,
+          isAdmin,
+          isAccountVerified,
+        },
+      },
     });
-}  
-catch (error) {
-  console.log(error,"error")
-  next(error);}
+  } catch (error) {
+    console.log(error, "error");
+    next(error);
+  }
+};
 
-
-}
-
-//will recive the real password if user forgot 
+//will recive the real password if user forgot
 export const forgotPassword = async (
   req: Request,
   res: Response,
   next: NextFunction
-)=>{
-try{
-  const data = await validateForgetPasswordSchema.parseAsync(req.body);
+) => {
+  try {
+    const data = await validateForgetPasswordSchema.parseAsync(req.body);
 
-  const user = await User.findOne({ email: data.email });
+    const user = await User.findOne({ email: data.email });
 
-  if (!user) {
-    return sendResponse(res, 404, {
-      status: "fail",
-      message: `User doesn't exists`,
-    });
-  }
+    if (!user) {
+      return sendResponse(res, 404, {
+        status: "fail",
+        message: `User doesn't exists`,
+      });
+    }
 
-  const realPassword= CryptoJS.AES.decrypt(user.password.toString(), process.env.JWT_SECRET!).toString(CryptoJS.enc.Utf8)
+    const realPassword = CryptoJS.AES.decrypt(
+      user.password.toString(),
+      process.env.JWT_SECRET!
+    ).toString(CryptoJS.enc.Utf8);
 
-  // HTML template 
-        const templateHTML = `
+    // HTML template
+    const templateHTML = `
         <h1>Your Password </h1>
         <p> The Password is <span style="color: green; font-weight: bold;"> ${realPassword} </span> </p>
-        `  
-        //sending email to user
-        sendEmail(data.email,"Forgot Password",templateHTML);
-        //response 
+        `;
+    //sending email to user
+    sendEmail(data.email, "Forgot Password", templateHTML);
+    //response
     sendResponse(res, 200, {
       status: "success",
-      data: {user} ,
+      data: { user },
     });
-
-
-}  
-catch (error) {
-  console.log(error,"error")
-  next(error);}
-
-
-}
+  } catch (error) {
+    console.log(error, "error");
+    next(error);
+  }
+};
