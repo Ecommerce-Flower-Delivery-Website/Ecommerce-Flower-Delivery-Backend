@@ -5,12 +5,12 @@ import { adminAuthMiddleware } from "@/middleware/adminAuthMiddleware";
 import { authMiddleware } from "./../middleware/authMiddleware";
 const router = express.Router();
 
-
 router
   .route("/")
   .get(
     // authMiddleware,
-     productController.getProducts)
+    productController.getProducts
+  )
   .post(
     // adminAuthMiddleware,
     upload.single("image"),
@@ -21,17 +21,18 @@ router
   .route("/:id")
   .get(
     // authMiddleware,
-     productController.getProduct)
+    productController.getProduct
+  )
   .delete(
-    // adminAuthMiddleware, 
-    productController.deleteProducts)
+    // adminAuthMiddleware,
+    productController.deleteProducts
+  )
   .put(
     // adminAuthMiddleware,
     upload.single("image"),
     productController.editProduct
   );
 
-router.route('/:id/relate')
-      .get(productController.getRelatedProducts)
+router.route("/:id/relate").get(productController.getRelatedProducts);
 
 export default router;
