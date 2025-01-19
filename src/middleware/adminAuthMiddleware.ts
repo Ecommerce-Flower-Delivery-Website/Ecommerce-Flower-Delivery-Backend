@@ -35,6 +35,8 @@ export const adminAuthMiddleware = async (
           message: `you are not authorized`,
         });
       }
+
+
       req.user = user;
       next();
     } catch {

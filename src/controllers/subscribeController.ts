@@ -279,3 +279,63 @@ export const addUserToPlan = async (
     next(error);
   }
 };
+
+export const deleteUserfromPlan = async (
+  req: Request & { user?: UserType },
+  res: Response,
+  next: NextFunction
+)=>{
+
+  try{
+    const id = req.params.id;
+
+    const findSubscribePlan  = await Subscribe.findById(id) ;
+    if (!findSubscribePlan) {
+      return sendResponse(res, 404, {
+        status: "fail",
+        message: "Subscribe Plan not found",
+      });
+    }
+
+    const user = req.user as UserType &
+    Document & { _id: mongoose.Types.ObjectId };
+
+  if (!user) {
+    return sendResponse(res, 404, {
+      status: "fail",
+      message: "User not found",
+    });
+  }
+
+  if(user.subscribe_id?.toString()===findSubscribePlan._id.toString()){
+
+    //user had subsciblePlan
+    user.subscribe_id = undefined;
+    await user.save();
+
+    // Filter out the user from the users_id array
+    if (findSubscribePlan?.users_id)
+      if (findSubscribePlan?.users_id?.length > 0) {
+    findSubscribePlan.users_id = findSubscribePlan.users_id.filter(
+        (userId) => userId?.user.toString() !== user._id.toString()
+      );
+    
+    }
+
+    // Save the updated subscribe plan
+    await findSubscribePlan.save();
+  }
+
+  return sendResponse(res, 200, {
+    status: "success",
+    data: "Delete User from Plan is successfully",
+  });
+
+  }catch(error){
+
+    next(error);
+
+  }
+
+
+}
