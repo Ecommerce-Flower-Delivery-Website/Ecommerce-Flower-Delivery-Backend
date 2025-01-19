@@ -10,10 +10,6 @@ router
   .route("/")
   .get(categoryController.getCategories)
   .post(categoryUpload.single("image"), categoryController.addCategory);
-  
-  router
-        .route("/withoutPagination")
-        .get(CategoryController.getAllCategory);
 
 router
   .route("/:id")
