@@ -8,7 +8,7 @@ import accessoryRouter from "./routes/accessoryRoutes";
 import cartRouter from "./routes/cartRoutes";
 import categoryRouter from "./routes/categoryRoutes";
 import contactRouter from "./routes/contactRoutes";
-import discountRouter from "./routes/discountRoutes";
+import giftDiscountRouter from "./routes/giftDiscountRoutes";
 import orderRouter from "./routes/orderRoutes";
 import passwordResetRouter from "./routes/passwordResetRoutes";
 import productRouter from "./routes/productRoutes";
@@ -82,7 +82,7 @@ app.use("/api/v1/reminder", reminderRouter);
 
 app.use("/api/v1/review", reviewRouter);
 
-app.use("/api/v1/discount", discountRouter);
+app.use("/api/v1/giftDiscounts", giftDiscountRouter);
 
 app.use(globalErrorHandling);
 

@@ -2,6 +2,7 @@ import express from "express";
 import categoryController from "./../controllers/categoryController";
 import categoryUpload from "@/middleware/categoryUpload";
 import { adminAuthMiddleware } from "@/middleware/adminAuthMiddleware";
+import CategoryController from "./../controllers/categoryController";
 
 const router = express.Router();
 
@@ -9,6 +10,10 @@ router
   .route("/")
   .get(categoryController.getCategories)
   .post(categoryUpload.single("image"), categoryController.addCategory);
+  
+  router
+        .route("/withoutPagination")
+        .get(CategoryController.getAllCategory);
 
 router
   .route("/:id")

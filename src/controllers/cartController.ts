@@ -96,7 +96,7 @@ const addElementToCart = async (
       });
     }
 
-    const { productId, accessoriesId } = req.body;
+    const { productId, productQuantity, accessoriesId } = req.body;
     await addEelementToCartValidation.parseAsync(req.body);
 
     if (!isProductFonud(productId)) {
@@ -126,6 +126,7 @@ const addElementToCart = async (
 
     cart.items.push({
       productId,
+      productQuantity,
       accessoriesId,
     });
 

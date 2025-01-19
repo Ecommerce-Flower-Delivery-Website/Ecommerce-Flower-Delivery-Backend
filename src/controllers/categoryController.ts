@@ -7,10 +7,24 @@ import {
 } from "@/validation/categoryValidation";
 
 const CategoryController = {
+  async getAllCategory(req: Request, res: Response, next : NextFunction){
+    try{
+      const categories = await Category.find();
+      sendResponse(res, 200, {
+        status: "success",
+        data: {
+          categories,
+        },
+      });
+    }catch(err){
+      next(err); 
+    }
+  },
   async getCategories(req: Request, res: Response, next: NextFunction) {
     try {
+      const countCategoryDocuments = await Category.countDocuments();
       const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const limit = parseInt(req.query.limit as string) || countCategoryDocuments;
       const skip = (page - 1) * limit;
 
       const categories = await Category.find().skip(skip).limit(limit);

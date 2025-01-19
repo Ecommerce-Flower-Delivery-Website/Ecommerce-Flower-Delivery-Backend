@@ -108,6 +108,37 @@ const ProductController = {
       next(err);
     }
   },
+  async getRelatedProducts(req: Request, res: Response , next : NextFunction){
+    try {
+      const { id } = req.params;
+      const product = await Product.findById(id);
+      if (!product) {
+        sendResponse(res, 404, {
+          status: "fail",
+          message: "Product not found",
+        });
+        return;
+      }
+      const relatedProducts = await Product.find({
+        category_id: product.category_id,
+        _id: { $ne: id },
+      }).limit(4);
+      if(!relatedProducts){
+        return sendResponse(res, 404, {
+          status: "fail",
+          message: "No related products found",
+          });
+      }
+      return sendResponse(res, 200, {
+        status: "success",
+        data: {
+          relatedProducts,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
   async editProduct(req: Request, res: Response, next: NextFunction) {
     try {
       await editeProductSchema.parseAsync(req.body);
