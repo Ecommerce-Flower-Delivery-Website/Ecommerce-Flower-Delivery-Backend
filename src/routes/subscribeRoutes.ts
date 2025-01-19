@@ -3,11 +3,12 @@ import * as subscribeController from "./../controllers/subscribeController";
 import { adminAuthMiddleware } from "../middleware/adminAuthMiddleware";
 import upload from '../middleware/upload.middleware';
 import { authMiddleware } from "@/middleware/authMiddleware";
+import filterMiddleware from "@/middleware/filterMiddleware";
 
 const subscribePlansRouter = express.Router();
 
 subscribePlansRouter.post("/",adminAuthMiddleware,upload.single('image'), subscribeController.createSubscribePlan )
-                    .get("/",subscribeController.getSubscribePlans)
+                    .get("/",  filterMiddleware,subscribeController.getSubscribePlans)
                     
 subscribePlansRouter.route("/:id",)
     .delete(adminAuthMiddleware,subscribeController.deleteSubscribePlan)

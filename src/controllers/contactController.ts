@@ -2,20 +2,26 @@ import { UserType } from "@/models/userModel";
 import { sendResponse } from "@/utils/sendResponse";
 import { NextFunction, Request, Response } from "express";
 import Contact from "./../models/contactModel";
+import { CustomRequest } from "@/types/customRequest";
 
 export default {
-  getAll: async (req: Request, res: Response, next: NextFunction) => {
+  getAll: async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
       const skip = (page - 1) * limit;
+
+      const query : { [key: string]: RegExp } = req.queryFilter ?? {};
 
       const isCheckedFilter =
         req.query.isChecked !== undefined
           ? { isChecked: req.query.isChecked === "true" }
           : {};
 
-      const contacts = await Contact.find(isCheckedFilter)
+      const contacts = await Contact.find({
+        ...query,
+        ...isCheckedFilter
+      })
         .skip(skip)
         .limit(limit)
         .populate("user_id");

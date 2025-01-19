@@ -38,7 +38,7 @@ const ReminderController = {
     }
   },
   async getReminders(
-    req: Request & { user?: UserType & { _id: string } },
+    req: CustomRequest,
     res: Response,
     next: NextFunction
   ) {

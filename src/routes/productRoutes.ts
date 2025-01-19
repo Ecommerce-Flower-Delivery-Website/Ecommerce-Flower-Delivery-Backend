@@ -3,12 +3,14 @@ import upload from "../middleware/productsPhotoUpload";
 import productController from "./../controllers/productController";
 import { adminAuthMiddleware } from "@/middleware/adminAuthMiddleware";
 import { authMiddleware } from "./../middleware/authMiddleware";
+import filterMiddleware from "@/middleware/filterMiddleware";
 const router = express.Router();
 
 router
   .route("/")
   .get(
     // authMiddleware,
+    filterMiddleware,
     productController.getProducts
   )
   .post(
