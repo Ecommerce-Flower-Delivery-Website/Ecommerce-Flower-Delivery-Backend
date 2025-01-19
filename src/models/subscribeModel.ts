@@ -10,6 +10,7 @@ export interface IUserReference {
 }
 
 export interface ISubscribe extends Document {
+  _id: mongoose.Types.ObjectId; 
   title: string;
   image: string;
   price: string;

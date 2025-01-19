@@ -24,8 +24,7 @@ dotenv.config();
 const PORT = process.env.PORT;
 
 mongoose
-  // .connect(process.env.DATABASE as string)
-  .connect("mongodb://localhost:27017/EcommerceFlowerDeliveryWebsite")
+  .connect(process.env.DATABASE as string)
   .then(() => {
     console.log("Connected to MongoDB");
     // seeding();

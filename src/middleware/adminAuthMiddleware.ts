@@ -35,12 +35,7 @@ export const adminAuthMiddleware = async (
           message: `you are not authorized`,
         });
       }
-      if(!user?.isAccountVerified){
-        return sendResponse(res, 203, {
-          status: "fail",
-          message: `Your email need to be verified`,
-        });
-      }
+
 
       req.user = user;
       next();

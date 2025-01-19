@@ -14,6 +14,10 @@ subscribePlansRouter.route("/:id",)
     .put(adminAuthMiddleware,upload.single('image'),subscribeController.editSubscribePlan)
     .get(subscribeController.getSubscribePlan)
     .post(authMiddleware,subscribeController.addUserToPlan )
+    .delete(authMiddleware,subscribeController.deleteUserfromPlan )
 
+subscribePlansRouter.route("/users/:id",)
+    .post(authMiddleware,subscribeController.addUserToPlan )
+    .delete(authMiddleware,subscribeController.deleteUserfromPlan )
     
 export default subscribePlansRouter;
