@@ -10,12 +10,24 @@ import {
 const ProductController = {
   async getProducts(req: Request, res: Response, next: NextFunction) {
     try {
-      const products = await Product.find().populate("category_id");
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+      const skip = (page - 1) * limit;
+
+      const products = await Product.find().populate("category_id").skip(skip).limit(limit);
+      const totalProducts = await Product.countDocuments();
+      const totalPages = Math.ceil(totalProducts / limit);
 
       sendResponse(res, 200, {
         status: "success",
         data: {
           products,
+          pagination: {
+            totalProducts,
+            totalPages,
+            currentPage: page,
+            pageSize: limit,
+          },
         },
       });
     } catch (err) {
