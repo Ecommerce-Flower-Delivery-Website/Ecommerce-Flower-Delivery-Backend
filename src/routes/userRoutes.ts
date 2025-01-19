@@ -2,10 +2,11 @@ import express from "express";
 import userController from "./../controllers/userController";
 import { adminAuthMiddleware } from "@/middleware/adminAuthMiddleware";
 import { authMiddleware } from "@/middleware/authMiddleware";
+import filterMiddleware from "@/middleware/filterMiddleware";
 
 const router = express.Router();
 
-router.get("/", userController.getUsers);
+router.get("/", filterMiddleware, userController.getUsers);
 
 router.get("/:id", userController.getUser);
 

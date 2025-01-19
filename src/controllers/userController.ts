@@ -2,14 +2,17 @@ import { NextFunction, Request, Response } from "express";
 import User from "./../models/userModel";
 import { sendResponse } from "@/utils/sendResponse";
 import { userUpdateSchema } from "@/validation/userValidation";
+import { CustomRequest } from "@/types/customRequest";
 
-const getUsers = async (req: Request, res: Response, next: NextFunction) => {
+const getUsers = async (req: CustomRequest, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const users = await User.find().select("-password").skip(skip).limit(limit);
+    const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+
+    const users = await User.find(query).select("-password").skip(skip).limit(limit);
 
     const totalUsers = await User.countDocuments();
     const totalPages = Math.ceil(totalUsers / limit);

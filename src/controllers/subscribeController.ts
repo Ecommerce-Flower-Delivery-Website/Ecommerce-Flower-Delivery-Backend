@@ -9,6 +9,7 @@ import {
 } from "../validation/subscribeValidation";
 import { sendResponse } from "../utils/sendResponse";
 import mongoose, { Document } from "mongoose";
+import { CustomRequest } from "@/types/customRequest";
 
 export const createSubscribePlan = async (
   req: Request & { user?: UserType },
@@ -90,7 +91,7 @@ export const deleteSubscribePlan = async (
 };
 
 export const getSubscribePlans = async (
-  req: Request,
+  req: CustomRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -99,9 +100,11 @@ export const getSubscribePlans = async (
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
+    const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+
     //page =-1 mean : get all results
     if (page === -1) {
-      const subscribePlans = await Subscribe.find().populate({
+      const subscribePlans = await Subscribe.find(query).populate({
         path: "users_id",
         select: "-password",
       });
@@ -113,7 +116,7 @@ export const getSubscribePlans = async (
         },
       });
     } else {
-      const subscribePlans = await Subscribe.find()
+      const subscribePlans = await Subscribe.find(query)
         .populate({
           path: "users_id.user",
           select: "-password",

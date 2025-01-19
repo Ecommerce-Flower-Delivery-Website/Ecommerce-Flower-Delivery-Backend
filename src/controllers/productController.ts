@@ -6,11 +6,14 @@ import {
   addProductSchema,
   editeProductSchema,
 } from "@/validation/productValidation";
+import { CustomRequest } from "@/types/customRequest";
 
 const ProductController = {
-  async getProducts(req: Request, res: Response, next: NextFunction) {
+  async getProducts(req: CustomRequest, res: Response, next: NextFunction) {
     try {
-      const products = await Product.find().populate("category_id");
+      const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+
+      const products = await Product.find(query).populate("category_id");
 
       sendResponse(res, 200, {
         status: "success",

@@ -1,5 +1,6 @@
 import express from "express";
 import giftDiscountController from "./../controllers/giftDiscountController";
+import filterMiddleware from "@/middleware/filterMiddleware";
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ router.put("/:id", giftDiscountController.updateGiftDiscountById);
 
 router.delete("/:id", giftDiscountController.removeGiftDiscountById);
 
-router.get("/", giftDiscountController.getAllGiftDiscounts);
+router.get("/", filterMiddleware, giftDiscountController.getAllGiftDiscounts);
 
 router.get("/code/:code", giftDiscountController.getByCodeGift);
 

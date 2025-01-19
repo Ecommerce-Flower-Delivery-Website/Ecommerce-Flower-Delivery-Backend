@@ -7,6 +7,7 @@ import {
   validateUpdateReviewSchema,
 } from "../validation/reviewValidation";
 import { sendResponse } from "../utils/sendResponse";
+import { CustomRequest } from "@/types/customRequest";
 
 export const createReview = async (
   req: Request & { user?: UserType & { _id: string } },
@@ -57,7 +58,7 @@ export const deleteReview = async (
 };
 
 export const getReviews = async (
-  req: Request,
+  req: CustomRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -66,7 +67,9 @@ export const getReviews = async (
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const reviews = await Review.find().skip(skip).limit(limit);
+    const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+
+    const reviews = await Review.find(query).skip(skip).limit(limit);
     const totalReviews = await Review.countDocuments();
     const totalPages = Math.ceil(totalReviews / limit);
 

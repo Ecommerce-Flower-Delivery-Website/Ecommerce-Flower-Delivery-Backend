@@ -7,6 +7,7 @@ import {
   updateGiftDiscountValidation,
 } from "@/validation/giftDiscountValidation";
 import z from "zod";
+import { CustomRequest } from "@/types/customRequest";
 
 //this is useful for front end
 //when user enter codeGift you can send request and know what is document match this code
@@ -133,7 +134,7 @@ const removeGiftDiscountById = async (
 };
 
 const getAllGiftDiscounts = async (
-  req: Request,
+  req: CustomRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -142,7 +143,9 @@ const getAllGiftDiscounts = async (
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const giftDiscounts = await GiftDiscount.find().skip(skip).limit(limit);
+    const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+
+    const giftDiscounts = await GiftDiscount.find(query).skip(skip).limit(limit);
     const totalGiftDiscounts = await GiftDiscount.countDocuments();
     const totalPages = Math.ceil(totalGiftDiscounts / limit);
 
