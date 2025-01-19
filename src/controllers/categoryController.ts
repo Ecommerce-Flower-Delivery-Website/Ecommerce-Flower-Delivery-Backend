@@ -5,29 +5,19 @@ import {
   addCategorySchema,
   editCategorySchema,
 } from "@/validation/categoryValidation";
+import { CustomRequest } from "@/types/customRequest";
 
 const CategoryController = {
-  async getAllCategory(req: Request, res: Response, next : NextFunction){
-    try{
-      const categories = await Category.find();
-      sendResponse(res, 200, {
-        status: "success",
-        data: {
-          categories,
-        },
-      });
-    }catch(err){
-      next(err); 
-    }
-  },
-  async getCategories(req: Request, res: Response, next: NextFunction) {
+  async getCategories(req: CustomRequest, res: Response, next: NextFunction) {
     try {
       const countCategoryDocuments = await Category.countDocuments();
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || countCategoryDocuments;
       const skip = (page - 1) * limit;
 
-      const categories = await Category.find().skip(skip).limit(limit);
+      const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+
+      const categories = await Category.find(query).skip(skip).limit(limit);
       const totalCategories = await Category.countDocuments();
       const totalPages = Math.ceil(totalCategories / limit);
 

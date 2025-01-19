@@ -6,6 +6,7 @@ import {
   updateAccessorySchema,
 } from "../validation/accessoryValidation";
 import { Types } from "mongoose";
+import { CustomRequest } from "@/types/customRequest";
 
 /**
  * @description Get All Accessories
@@ -15,7 +16,7 @@ import { Types } from "mongoose";
  */
 
 export const getAllAccessoriesController = async (
-  req: Request,
+  req: CustomRequest,
   res: Response
 ): Promise<void> => {
   try {
@@ -28,7 +29,9 @@ export const getAllAccessoriesController = async (
 
     const totalPages = Math.ceil(totalAccessories / ACCESSORIES_PER_PAGE);
 
-    const accessories = await Accessory.find()
+    const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+
+    const accessories = await Accessory.find(query)
       .skip((page - 1) * ACCESSORIES_PER_PAGE)
       .limit(ACCESSORIES_PER_PAGE)
       .sort({ createdAt: -1 })
