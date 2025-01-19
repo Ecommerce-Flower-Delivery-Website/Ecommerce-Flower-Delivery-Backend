@@ -41,7 +41,7 @@ const getCart = async (
       });
     }
 
-    let priceAll = 0;
+    let priceAll = 0, productsCount = 0;
 
     for (let i = 0; i < cart.items.length; i++) {
       const item = cart.items[i];
@@ -52,6 +52,7 @@ const getCart = async (
         delete cart.items[i];
         continue;
       }
+      productsCount += cart.items[i].productQuantity;
       let priceCartItem = Number(product.price);
 
       const accessories = item.accessoriesId as TAccessory[] | undefined;
@@ -71,6 +72,7 @@ const getCart = async (
     }
 
     cart.priceAll = priceAll;
+    cart.productsCount = productsCount;
 
     return sendResponse(res, 200, {
       status: "success",

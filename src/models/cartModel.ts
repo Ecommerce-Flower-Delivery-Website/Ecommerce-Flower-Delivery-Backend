@@ -40,6 +40,7 @@ export type TCart = Document &
       price?: number;
     }>;
     priceAll?: number;
+    productsCount: number;
   };
 
 export default mongoose.model("Cart", cartSchema);
