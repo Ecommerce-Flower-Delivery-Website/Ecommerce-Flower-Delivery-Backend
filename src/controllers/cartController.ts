@@ -41,12 +41,13 @@ const getCart = async (
       });
     }
 
-    let priceAll = 0, productsCount = 0;
+    let priceAll = 0,
+      productsCount = 0;
 
     for (let i = 0; i < cart.items.length; i++) {
       const item = cart.items[i];
 
-      const product = item.productId as TProduct | null;
+      const product = item.productId as unknown as TProduct | null;
       //if product removed by admin
       if (!product) {
         delete cart.items[i];
@@ -55,7 +56,9 @@ const getCart = async (
       productsCount += cart.items[i].productQuantity;
       let priceCartItem = Number(product.price);
 
-      const accessories = item.accessoriesId as TAccessory[] | undefined;
+      const accessories = item.accessoriesId as unknown as
+        | TAccessory[]
+        | undefined;
       if (accessories) {
         for (let j = 0; j < accessories.length; j++) {
           //if accessory removed by admin

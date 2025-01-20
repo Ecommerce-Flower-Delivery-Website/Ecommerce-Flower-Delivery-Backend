@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { string } from "zod";
 
 const orderSchema = new mongoose.Schema(
   {
@@ -41,18 +42,17 @@ const orderSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    timeDelivery: {
+    deliveryDate: {
       type: String,
       required: true,
     },
-    address: {
-      type: {
-        street: String,
-        apartmentNumber: Number,
-      },
-      required: true,
+    street: {
+      type: String,
     },
-    doesKnowAddress: {
+    apartmentNumber: {
+      type: Number,
+    },
+    dontKnowAddress: {
       type: Boolean,
       default: true,
     },
