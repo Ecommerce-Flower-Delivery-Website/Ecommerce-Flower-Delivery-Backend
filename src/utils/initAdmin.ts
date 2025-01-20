@@ -1,3 +1,4 @@
+import cartModel from "@/models/cartModel";
 import { User } from "../models/userModel";
 
 async function initSuperAdmin() {
@@ -13,8 +14,12 @@ async function initSuperAdmin() {
         password: "admin123",
         isAdmin: true,
       });
-
       await admin.save();
+
+      await cartModel.create({
+         userId: admin._id,
+      });
+
       console.log("Admin user created successfully");
     }
   } catch (error) {

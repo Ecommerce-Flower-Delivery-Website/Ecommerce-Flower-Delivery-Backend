@@ -96,26 +96,17 @@ export const getSubscribePlans = async (
   next: NextFunction
 ) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+    const totalPlans = await Subscribe.countDocuments(query);
+
+    let page = parseInt(req.query.page as string) || 1;
+    if (page === -1) page = 1;
+
+    const limit = parseInt(req.query.limit as string) || totalPlans;
     const skip = (page - 1) * limit;
 
-    const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+    const totalPages = Math.ceil(totalPlans / limit);
 
-    //page =-1 mean : get all results
-    if (page === -1) {
-      const subscribePlans = await Subscribe.find(query).populate({
-        path: "users_id",
-        select: "-password",
-      });
-
-      return sendResponse(res, 200, {
-        status: "success",
-        data: {
-          subscribePlans,
-        },
-      });
-    } else {
       const subscribePlans = await Subscribe.find(query)
         .populate({
           path: "users_id.user",
@@ -123,9 +114,6 @@ export const getSubscribePlans = async (
         })
         .skip(skip)
         .limit(limit);
-
-      const totalPlans = await Subscribe.countDocuments();
-      const totalPages = Math.ceil(totalPlans / limit);
 
       return sendResponse(res, 200, {
         status: "success",
@@ -139,7 +127,6 @@ export const getSubscribePlans = async (
           },
         },
       });
-    }
   } catch (error) {
     next(error);
   }

@@ -25,11 +25,11 @@ export const getAllAccessoriesController = async (
 
     const page = parseInt(pageNumber as string, 10) || 1;
 
-    const totalAccessories = await Accessory.countDocuments();
+    const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+
+    const totalAccessories = await Accessory.countDocuments(query);
 
     const totalPages = Math.ceil(totalAccessories / ACCESSORIES_PER_PAGE);
-
-    const query : { [key: string]: RegExp } = req.queryFilter ?? {};
 
     const accessories = await Accessory.find(query)
       .skip((page - 1) * ACCESSORIES_PER_PAGE)

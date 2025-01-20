@@ -10,15 +10,14 @@ import { CustomRequest } from "@/types/customRequest";
 const CategoryController = {
   async getCategories(req: CustomRequest, res: Response, next: NextFunction) {
     try {
-      const countCategoryDocuments = await Category.countDocuments();
+      const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+      const totalCategories = await Category.countDocuments(query);
+
       const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || countCategoryDocuments;
+      const limit = parseInt(req.query.limit as string) || totalCategories;
       const skip = (page - 1) * limit;
 
-      const query : { [key: string]: RegExp } = req.queryFilter ?? {};
-
       const categories = await Category.find(query).skip(skip).limit(limit);
-      const totalCategories = await Category.countDocuments();
       const totalPages = Math.ceil(totalCategories / limit);
 
       sendResponse(res, 200, {

@@ -63,15 +63,18 @@ export const getReviews = async (
   next: NextFunction
 ) => {
   try {
+    const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+    const totalReviews = await Review.countDocuments(query);
+
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const limit = parseInt(req.query.limit as string) || totalReviews;
     const skip = (page - 1) * limit;
 
-    const query : { [key: string]: RegExp } = req.queryFilter ?? {};
-
     const reviews = await Review.find(query).skip(skip).limit(limit);
-    const totalReviews = await Review.countDocuments();
     const totalPages = Math.ceil(totalReviews / limit);
+
+    console.log(totalPages);
+    
 
     return sendResponse(res, 200, {
       status: "success",
@@ -110,13 +113,13 @@ export const editReview = async (
 
     findReview.name = req.body.name;
     findReview.text = req.body.text;
-    findReview.shouldShow = req.body.shouldShow;
 
     const updatedReview = await findReview.save();
 
     return sendResponse(res, 201, {
       status: "success",
       data: updatedReview,
+      
     });
   } catch (error) {
     next(error);

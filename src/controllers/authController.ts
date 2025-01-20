@@ -48,6 +48,7 @@ export const register = async (
     //   email: user.email,
     // });
 
+    //create empty cart for user
     await cartModel.create({
       userId: user._id,
     });

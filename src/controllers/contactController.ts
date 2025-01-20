@@ -7,16 +7,21 @@ import { CustomRequest } from "@/types/customRequest";
 export default {
   getAll: async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
-      const skip = (page - 1) * limit;
-
-      const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+      const query : {  [key: string]: RegExp } = req.queryFilter ?? {};      
 
       const isCheckedFilter =
         req.query.isChecked !== undefined
           ? { isChecked: req.query.isChecked === "true" }
           : {};
+
+      const totalContacts = await Contact.countDocuments({
+        ...query,
+        ...isCheckedFilter
+      });
+
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || totalContacts;
+      const skip = (page - 1) * limit;
 
       const contacts = await Contact.find({
         ...query,
@@ -24,9 +29,8 @@ export default {
       })
         .skip(skip)
         .limit(limit)
-        .populate("user_id");
+        .populate("user_id");      
 
-      const totalContacts = await Contact.countDocuments(isCheckedFilter);
       const totalPages = Math.ceil(totalContacts / limit);
 
       sendResponse(res, 200, {

@@ -139,14 +139,14 @@ const getAllGiftDiscounts = async (
   next: NextFunction
 ) => {
   try {
+    const query : { [key: string]: RegExp } = req.queryFilter ?? {};    
+    const totalGiftDiscounts = await GiftDiscount.countDocuments(query);
+
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const limit = parseInt(req.query.limit as string) || totalGiftDiscounts;
     const skip = (page - 1) * limit;
 
-    const query : { [key: string]: RegExp } = req.queryFilter ?? {};
-
     const giftDiscounts = await GiftDiscount.find(query).skip(skip).limit(limit);
-    const totalGiftDiscounts = await GiftDiscount.countDocuments();
     const totalPages = Math.ceil(totalGiftDiscounts / limit);
 
     sendResponse(res, 200, {
