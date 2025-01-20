@@ -29,17 +29,12 @@ export const authMiddleware = async (
         });
       }
 
-      if(!user?.isAdmin && !user?.isAccountVerified){
+      if (!user?.isAdmin && !user?.isAccountVerified) {
         return sendResponse(res, 203, {
           status: "fail",
           message: `Your email need to be verified`,
         });
-        
       }
-
-      
-
-
 
       req.user = user;
       next();
