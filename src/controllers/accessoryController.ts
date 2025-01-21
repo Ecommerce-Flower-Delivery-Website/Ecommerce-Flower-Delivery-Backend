@@ -1,5 +1,7 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import Accessory from "../models/accessoryModel"; // Adjust the path based on your project structure
+import Product from "./../models/productModel";
+
 import { ZodError } from "zod";
 import {
   accessorySchema,
@@ -7,6 +9,9 @@ import {
 } from "../validation/accessoryValidation";
 import { Types } from "mongoose";
 import { CustomRequest } from "@/types/customRequest";
+import productModel from "@/models/productModel";
+import mongoose from "mongoose";
+import { access } from "fs";
 
 /**
  * @description Get All Accessories
@@ -20,22 +25,21 @@ export const getAllAccessoriesController = async (
   res: Response
 ): Promise<void> => {
   try {
-    const ACCESSORIES_PER_PAGE = 10;
-    const { pageNumber } = req.query;
-
-    const page = parseInt(pageNumber as string, 10) || 1;
-
     const query : { [key: string]: RegExp } = req.queryFilter ?? {};
-
     const totalAccessories = await Accessory.countDocuments(query);
 
-    const totalPages = Math.ceil(totalAccessories / ACCESSORIES_PER_PAGE);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || totalAccessories;
+    const skip = (page - 1) * limit;
+
+    const totalPages = Math.ceil(totalAccessories / limit);
 
     const accessories = await Accessory.find(query)
-      .skip((page - 1) * ACCESSORIES_PER_PAGE)
-      .limit(ACCESSORIES_PER_PAGE)
+      .skip(skip)
+      .limit(limit)
       .sort({ createdAt: -1 })
       .populate("products_array");
+    
 
     res.status(200).json({
       message: "Accessories received",
@@ -59,11 +63,14 @@ export const getAllAccessoriesController = async (
 
 export const createAccessoryController = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     //? Validate request body with Zod schema
-    // await accessorySchema.parse(req.body);
+     await accessorySchema.parseAsync(req.body);
+
+    const products_array = JSON.parse(req.body.products_array) as Array<mongoose.Types.ObjectId>;
 
     const accessory = await Accessory.create({
       title: req.body.title,
@@ -73,7 +80,17 @@ export const createAccessoryController = async (
       image: req.file
         ? `/public/upload/images/accessories/${req.file.filename}`
         : null,
-    });
+        products_array
+    });   
+
+    // The product model has an accessory_id array. We will add the current accessory's _id to this array 
+    for (const productId of products_array) {
+      const product = await productModel.findById(productId);
+      if (product) {
+        product.accessory_id.push(accessory._id);
+        await product.save();
+      }
+    }
 
     //* Respond with the saved accessory
     res.status(201).json({
@@ -81,17 +98,7 @@ export const createAccessoryController = async (
       data: accessory
     });
   } catch (err) {
-    if (err instanceof ZodError) {
-      //! Handle Zod validation errors
-      res.status(400).json({
-        error: "Validation Error",
-        details: err.errors,
-      });
-    } else {
-      //! Handle other errors
-      console.error(err);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    next(err);
   }
 };
 
@@ -135,7 +142,8 @@ export const getAccessoryByIdController = async (
 
 export const updateAccessoryController = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<any> => {
   try {
     const { id } = req.params;
@@ -154,13 +162,11 @@ export const updateAccessoryController = async (
       return res.status(404).json({ error: "Accessory not found" });
     }
 
+    console.log(updatedAccessory);
+
     res.status(200).json(updatedAccessory);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      status: "error",
-      message: "Internal Server Error",
-    });
+    next(err);
   }
 };
 
@@ -173,7 +179,8 @@ export const updateAccessoryController = async (
 
 export const deleteAccessoryController = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const { id } = req.params;
@@ -182,15 +189,35 @@ export const deleteAccessoryController = async (
       res.status(400).json({ error: "Invalid accessory ID" });
     }
 
-    const deletedAccessory = await Accessory.findByIdAndDelete(id);
+    const accessory = await Accessory.findById(id).populate("products_array");
 
-    if (!deletedAccessory) {
-      res.status(404).json({ error: "Accessory not found" });
+    if (!accessory) {
+     res.status(404).json({ error: "Accessory not found" });
+      return;
     }
 
+    // Remove the current accessory reference from the accessory_id array field of all related products
+    if (accessory.products_array) {
+      const arrayProductRelatedToAccessory = accessory.products_array;
+
+      for (const productId of arrayProductRelatedToAccessory) {
+        const product = await Product.findById(productId);
+
+        if (product) {
+          product.accessory_id = product.accessory_id.filter(
+            (id) => id.toString() !== accessory._id.toString()
+          );
+
+          await product.save();
+        }
+      }
+    }
+
+    await Accessory.deleteOne({_id: accessory._id});
     res.status(200).json({ message: "Accessory deleted successfully" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Internal Server Error" });
+   next(err);
   }
 };
+
+

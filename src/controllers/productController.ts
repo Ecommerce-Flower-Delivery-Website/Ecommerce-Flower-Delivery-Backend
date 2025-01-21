@@ -71,7 +71,6 @@ const ProductController = {
         discount: req.body.discount,
         quantity: req.body.quantity,
         category_id: req.body.category_id,
-        accessory_id: req.body.accessory_id,
         // Handle image upload
         image: req.file
           ? `/public/upload/images/products/${req.file.filename}`
@@ -162,7 +161,6 @@ const ProductController = {
       product.description = req.body.description ?? product.description;
       product.quantity = req.body.quantity ?? product.quantity;
       product.category_id = req.body.category_id ?? product.category_id;
-      product.accessory_id = req.body.accessory_id ?? product.accessory_id;
       if (req.file) {
         product.image = `/public/upload/images/products/${req.file.filename}`;
       }

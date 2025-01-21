@@ -7,6 +7,11 @@ import { UserType } from "@/models/userModel";
 import { addEelementToCartValidation } from "@/validation/cartValidation";
 import { isProductFonud, validateIdSchema } from "@/utils/databaseHelpers";
 
+// Retrieves and processes the user's cart:
+// - Verifies user authentication.
+// - Fetches cart with product and accessory details from the database.
+// - Calculates total price and handles missing products/accessories.
+// - Updates cart with total price and product count, then returns the data or an error.
 const getCart = async (
   req: Request & {
     user?: UserType;
@@ -32,6 +37,8 @@ const getCart = async (
         select: "price title image",
       })
       .select("-__v -userId")
+
+      // Use `.lean()` to return a plain JavaScript object instead of a Mongoose document, improving performance.
       .lean()) as TCart | null;
 
     if (!cart) {
@@ -44,6 +51,7 @@ const getCart = async (
     let priceAll = 0,
       productsCount = 0;
 
+    // Loop through each cart item and calculate price, handling missing products/accessories
     for (let i = 0; i < cart.items.length; i++) {
       const item = cart.items[i];
 
@@ -53,8 +61,11 @@ const getCart = async (
         delete cart.items[i];
         continue;
       }
+
+      // Accumulate product quantity to the total count
       productsCount += cart.items[i].productQuantity;
-      let priceCartItem = Number(product.price);
+
+      let priceCartItem = Number(product.price); // Start with the product price
 
       const accessories = item.accessoriesId as unknown as
         | TAccessory[]
@@ -66,14 +77,18 @@ const getCart = async (
             delete cart.items[i].accessoriesId[j];
             continue;
           }
-          priceCartItem += accessories[j].price;
+          
+          priceCartItem += Number(accessories[j].price); // Add accessory price to the cart item total
         }
       }
-
+      // Set the final price for the current cart item
       cart.items[i].price = priceCartItem;
+
+      // Add this item’s price to the total cart price
       priceAll += priceCartItem;
     }
 
+    // Update the cart with the calculated total price and products count
     cart.priceAll = priceAll;
     cart.productsCount = productsCount;
 
