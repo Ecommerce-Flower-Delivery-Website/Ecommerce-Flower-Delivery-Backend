@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-const productSchema = z.object({
-  description: z.string(),
-  title: z.string(),
-  image: z.string(),
-  discount: z.number().optional(),
-  price: z.number(),
-});
+// const productSchema = z.object({
+//   description: z.string(),
+//   title: z.string(),
+//   image: z.string(),
+//   discount: z.number().optional(),
+//   price: z.number(),
+// });
 
 // Create Order schema
 const createOrderSchema = z
@@ -17,8 +17,11 @@ const createOrderSchema = z
     recipientName: z.string().min(1, "Recipient name is required"),
     recipientPhone: z.string().min(10, "Valid phone number is required"),
     deliveryDate: z.string().min(1, "Delivery date is required"),
-    deliveryTime: z.string().min(1, "Delivery time is required"),
-    discountGift: z.string().min(1, "Delivery time is required").optional(),
+    deliveryTime: z.string().min(1, "delivery time time is required"),
+    discountGift: z
+      .string()
+      .min(1, "discount gift time is required")
+      .optional(),
     street: z.string().optional(),
     apartmentNumber: z.string().optional(),
     dontKnowAddress: z.boolean().default(false),
@@ -27,7 +30,6 @@ const createOrderSchema = z
       .string()
       .regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "Expiry date must be in MM/YY format"),
     cvv: z.string().regex(/^\d{3,4}$/, "CVV must be 3 or 4 digits"),
-    items: z.array(productSchema).nonempty(),
   })
   .refine(
     (data) => {
