@@ -10,12 +10,23 @@ import {
 const ProductController = {
   async getProducts(req: Request, res: Response, next: NextFunction) {
     try {
-      const products = await Product.find().populate("category_id");
-
+      const countProductsDocuments = await Product.countDocuments();
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || countProductsDocuments;
+      const skip = (page - 1) * limit;
+      const products = await Product.find().populate("category_id").skip(skip).limit(limit);;
+      const totalProducts = await Product.countDocuments();
+      const totalPages = Math.ceil(totalProducts / limit);
       sendResponse(res, 200, {
         status: "success",
         data: {
           products,
+          pagination: {
+            totalProducts,
+            totalPages,
+            currentPage: page,
+            pageSize: limit,
+          }
         },
       });
     } catch (err) {
@@ -108,7 +119,7 @@ const ProductController = {
       next(err);
     }
   },
-  async getRelatedProducts(req: Request, res: Response , next : NextFunction){
+  async getRelatedProducts(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
       const product = await Product.findById(id);
@@ -123,11 +134,11 @@ const ProductController = {
         category_id: product.category_id,
         _id: { $ne: id },
       }).limit(4);
-      if(!relatedProducts){
+      if (!relatedProducts) {
         return sendResponse(res, 404, {
           status: "fail",
           message: "No related products found",
-          });
+        });
       }
       return sendResponse(res, 200, {
         status: "success",
