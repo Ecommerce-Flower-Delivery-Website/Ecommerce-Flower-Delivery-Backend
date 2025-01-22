@@ -4,6 +4,7 @@ import CryptoJS from "crypto-js";
 import mongoose, { Document, InferSchemaType, model } from "mongoose";
 // import bcryptjs from "bcryptjs";
 import { subscribeType } from "./subscribeModel";
+import cartModel from "./cartModel";
 const userSchema = new mongoose.Schema(
   {
     name: {

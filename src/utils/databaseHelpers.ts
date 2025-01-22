@@ -2,6 +2,7 @@ import Product, { TProduct } from "../models/productModel"
 import Accessory from "../models/accessoryModel"
 import mongoose from "mongoose";
 import z from "zod";
+import cartModel from "@/models/cartModel";
 
 export const isValidObjectId = (id: string): boolean =>
   mongoose.Types.ObjectId.isValid(id);
@@ -40,3 +41,9 @@ export const removeProductFromAccessories  = async (product: TProduct) => {
       await accessoryDocument.save();
     }
 };
+
+export const isUserHaveCart = async (userId: mongoose.Types.ObjectId) => {
+  const cart = await cartModel.findOne({ userId });
+  if (cart) return true;
+  else return false;
+}

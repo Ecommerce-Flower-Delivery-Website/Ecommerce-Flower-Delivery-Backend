@@ -10,6 +10,8 @@ import { sendResponse } from "@/utils/helpers";
 import { sendEmail } from "../utils/sendEmail";
 import CryptoJS from "crypto-js";
 import cartModel from "@/models/cartModel";
+import { isUserHaveCart } from "@/utils/databaseHelpers";
+import mongoose from "mongoose";
 
 /*
 1- create user
@@ -169,6 +171,8 @@ export const login_admin = async (
         message: `User doesn't exists`,
       });
     }
+    const userId = user._id as mongoose.Types.ObjectId;
+
     const isAuth = await user.comparePassword(data.password);
     if (!isAuth) {
       return sendResponse(res, 401, {
@@ -176,6 +180,12 @@ export const login_admin = async (
         message: `invalid credential`,
       });
     }
+
+    //create cart of not have
+    if (!isUserHaveCart(userId)) {
+      await cartModel.create({userId});
+    }
+
     const token = createToken({
       id: user._id,
       email: user.email,
