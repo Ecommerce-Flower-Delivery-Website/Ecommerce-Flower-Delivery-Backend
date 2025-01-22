@@ -28,8 +28,8 @@ const PORT = process.env.PORT;
 let myServer : Server | undefined;
 
 mongoose
-   .connect(process.env.DATABASE as string)
-  // .connect("mongodb://localhost:27017/EcommerceFlowerDeliveryWebsite")
+    .connect(process.env.DATABASE as string)
+//  .connect("mongodb://localhost:27017/EcommerceFlowerDeliveryWebsite")
   .then(async () => {
     console.log("Connected to MongoDB");
     // seeding();
