@@ -16,7 +16,7 @@ export default {
 
       const totalContacts = await Contact.countDocuments({
         ...query,
-        ...isCheckedFilter
+        ...isCheckedFilter,
       });
 
       const page = parseInt(req.query.page as string) || 1;
@@ -54,6 +54,20 @@ export default {
     try {
       //@ts-expect-error authenticated route
       const user = req.user as UserType & { _id: string };
+
+      //check if user have contact with isChecked: false
+      const contactNotChecked = await Contact.findOne({
+        user_id: user._id,
+        isChecked: false
+      });
+
+      if (contactNotChecked) {
+        return sendResponse(res, 409, {
+          status: "fail",
+          message: "You have contact that are not checked.",
+        });
+      }
+      
       const newContact = await Contact.create({ user_id: user._id });
       sendResponse(res, 201, { status: "success", data: newContact });
     } catch (error) {

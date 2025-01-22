@@ -164,6 +164,7 @@ export const login_admin = async (
     const user = await User.findOne({
       email: data.email,
       isAdmin: true,
+      isAccountVerified: true
     });
     if (!user) {
       return sendResponse(res, 404, {

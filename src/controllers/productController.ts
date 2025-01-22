@@ -13,7 +13,7 @@ const ProductController = {
   async getProducts(req: CustomRequest, res: Response, next: NextFunction) {
     try {
       const query: { [key: string]: RegExp } = req.queryFilter ?? {};
-      const countProductsDocuments = await Product.countDocuments();
+      const countProductsDocuments = await Product.countDocuments(query);
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || countProductsDocuments;
       const skip = (page - 1) * limit;
