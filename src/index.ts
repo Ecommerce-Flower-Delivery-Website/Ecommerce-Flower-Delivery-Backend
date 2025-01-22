@@ -28,12 +28,12 @@ const PORT = process.env.PORT;
 let myServer : Server | undefined;
 
 mongoose
-    .connect(process.env.DATABASE as string)
-//  .connect("mongodb://localhost:27017/EcommerceFlowerDeliveryWebsite")
-  .then(async () => {
+  // .connect(process.env.DATABASE as string)
+  .connect("mongodb://localhost:27017/EcommerceFlowerDeliveryWebsite")
+  .then(() => {
     console.log("Connected to MongoDB");
     // seeding();
-    await initSuperAdmin();
+   initSuperAdmin();
 
    myServer = app.listen(PORT, () => {
       console.log(`App running on port ${PORT}`);
