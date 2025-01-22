@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { string } from "zod";
 
 const orderSchema = new mongoose.Schema(
   {
@@ -8,9 +7,18 @@ const orderSchema = new mongoose.Schema(
         {
           title: { type: String, required: true },
           image: { type: String, required: true },
-          priceAfterDiscount: { type: Number, required: true },
-          discount: { type: Number },
+          currentPrice: { type: Number, required: true },
           quantity: { type: Number, required: true },
+          accessories: {
+            type: [
+              {
+                title: { type: String, required: true },
+                image: { type: String, required: true },
+                currentPrice: { type: Number, required: true },
+                quantity: { type: Number, required: true },
+              },
+            ],
+          },
         },
       ],
       required: true,
