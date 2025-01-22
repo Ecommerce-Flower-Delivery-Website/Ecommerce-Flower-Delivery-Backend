@@ -37,7 +37,9 @@ const productSchema = new mongoose.Schema(
   { timestamps: false }
 );
 
-export type TProduct = Document &
-  mongoose.InferSchemaType<typeof productSchema>;
+export type TProduct = 
+  mongoose.InferSchemaType<typeof productSchema> & {
+    _id: mongoose.Types.ObjectId;
+  };
 
 export default mongoose.model("Product", productSchema);

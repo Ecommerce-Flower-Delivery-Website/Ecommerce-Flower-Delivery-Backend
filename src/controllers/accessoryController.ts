@@ -148,6 +148,9 @@ export const updateAccessoryController = async (
   try {
     const { id } = req.params;
 
+    console.log(req.body);
+    
+
     const parsedBody = updateAccessorySchema.parse(req.body);
 
     if (!Types.ObjectId.isValid(id)) {
@@ -156,13 +159,11 @@ export const updateAccessoryController = async (
 
     const updatedAccessory = await Accessory.findByIdAndUpdate(id, parsedBody, {
       new: true,
-    });
+    });        
 
     if (!updatedAccessory) {
       return res.status(404).json({ error: "Accessory not found" });
     }
-
-    console.log(updatedAccessory);
 
     res.status(200).json(updatedAccessory);
   } catch (err) {

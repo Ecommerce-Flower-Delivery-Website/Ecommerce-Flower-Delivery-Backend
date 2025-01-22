@@ -1,5 +1,5 @@
 import { sendResponse } from "@/utils/sendResponse";
-import Product from "./../models/productModel";
+import Product, { TProduct } from "./../models/productModel";
 import Category from "./../models/categoryModel";
 import { NextFunction, Request, Response } from "express";
 import {
@@ -7,6 +7,8 @@ import {
   editeProductSchema,
 } from "@/validation/productValidation";
 import { CustomRequest } from "@/types/customRequest";
+import { removeProductFromAccessories } from "@/utils/databaseHelpers";
+import mongoose from "mongoose";
 
 const ProductController = {
   async getProducts(req: CustomRequest, res: Response, next: NextFunction) {
@@ -101,6 +103,7 @@ const ProductController = {
         });
         return;
       }
+      await removeProductFromAccessories(findProduct as TProduct);
       await Product.findByIdAndDelete(id);
       sendResponse(res, 200, {
         status: "success",
