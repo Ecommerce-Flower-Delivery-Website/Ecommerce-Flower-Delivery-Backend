@@ -10,13 +10,16 @@ export const authMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.header("Authorization")?.replace("Bearer ", "");
+  
+  
+  const token = req.headers['authorization']?.split(' ')[1];
   if (!token) {
     return sendResponse(res, 401, {
       status: "fail",
       message: `No token, authorization denied`,
     });
   }
+
   if (token) {
     try {
       const decoded = verifyToken(token) as { id: string };
@@ -29,17 +32,12 @@ export const authMiddleware = async (
         });
       }
 
-      if(!user?.isAdmin && !user?.isAccountVerified){
+      if (!user?.isAdmin && !user?.isAccountVerified) {
         return sendResponse(res, 203, {
           status: "fail",
           message: `Your email need to be verified`,
         });
-        
       }
-
-      
-
-
 
       req.user = user;
       next();
@@ -50,4 +48,5 @@ export const authMiddleware = async (
       });
     }
   }
+
 };

@@ -1,20 +1,23 @@
 import { sendResponse } from "@/utils/sendResponse";
-import Product from "./../models/productModel";
+import Product, { TProduct } from "./../models/productModel";
 import Category from "./../models/categoryModel";
 import { NextFunction, Request, Response } from "express";
 import {
   addProductSchema,
   editeProductSchema,
 } from "@/validation/productValidation";
+import { CustomRequest } from "@/types/customRequest";
+import { removeProductFromAccessories } from "@/utils/databaseHelpers";
 
 const ProductController = {
-  async getProducts(req: Request, res: Response, next: NextFunction) {
+  async getProducts(req: CustomRequest, res: Response, next: NextFunction) {
     try {
+      const query: { [key: string]: RegExp } = req.queryFilter ?? {};
       const countProductsDocuments = await Product.countDocuments();
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || countProductsDocuments;
       const skip = (page - 1) * limit;
-      const products = await Product.find().populate("category_id").skip(skip).limit(limit);;
+      const products = await Product.find(query).populate("category_id").skip(skip).limit(limit);;
       const totalProducts = await Product.countDocuments();
       const totalPages = Math.ceil(totalProducts / limit);
       sendResponse(res, 200, {
@@ -79,7 +82,6 @@ const ProductController = {
         discount: req.body.discount,
         quantity: req.body.quantity,
         category_id: req.body.category_id,
-        accessory_id: req.body.accessory_id,
         // Handle image upload
         image: req.file
           ? `/public/upload/images/products/${req.file.filename}`
@@ -110,6 +112,7 @@ const ProductController = {
         });
         return;
       }
+      await removeProductFromAccessories(findProduct as TProduct);
       await Product.findByIdAndDelete(id);
       sendResponse(res, 200, {
         status: "success",
@@ -170,7 +173,6 @@ const ProductController = {
       product.description = req.body.description ?? product.description;
       product.quantity = req.body.quantity ?? product.quantity;
       product.category_id = req.body.category_id ?? product.category_id;
-      product.accessory_id = req.body.accessory_id ?? product.accessory_id;
       if (req.file) {
         product.image = `/public/upload/images/products/${req.file.filename}`;
       }

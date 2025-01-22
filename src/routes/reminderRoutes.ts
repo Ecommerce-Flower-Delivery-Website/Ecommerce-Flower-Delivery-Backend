@@ -5,7 +5,7 @@ import reminderController from "./../controllers/reminderController";
 const router = express.Router();
     
 router.route("/")
-    .get(reminderController.getReminders)
+    .get( reminderController.getReminders)
     .post( reminderController.addReminder)
     .delete( reminderController.removeReminder)
 

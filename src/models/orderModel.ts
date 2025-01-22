@@ -7,9 +7,18 @@ const orderSchema = new mongoose.Schema(
         {
           title: { type: String, required: true },
           image: { type: String, required: true },
-          priceAfterDiscount: { type: Number, required: true },
-          discount: { type: Number },
+          currentPrice: { type: Number, required: true },
           quantity: { type: Number, required: true },
+          accessories: {
+            type: [
+              {
+                title: { type: String, required: true },
+                image: { type: String, required: true },
+                currentPrice: { type: Number, required: true },
+                quantity: { type: Number, required: true },
+              },
+            ],
+          },
         },
       ],
       required: true,
@@ -41,18 +50,17 @@ const orderSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    timeDelivery: {
+    deliveryDate: {
       type: String,
       required: true,
     },
-    address: {
-      type: {
-        street: String,
-        apartmentNumber: Number,
-      },
-      required: true,
+    street: {
+      type: String,
     },
-    doesKnowAddress: {
+    apartmentNumber: {
+      type: Number,
+    },
+    dontKnowAddress: {
       type: Boolean,
       default: true,
     },

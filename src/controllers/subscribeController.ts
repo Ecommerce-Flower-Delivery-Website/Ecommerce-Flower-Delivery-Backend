@@ -9,6 +9,7 @@ import {
 } from "../validation/subscribeValidation";
 import { sendResponse } from "../utils/sendResponse";
 import mongoose, { Document } from "mongoose";
+import { CustomRequest } from "@/types/customRequest";
 
 export const createSubscribePlan = async (
   req: Request & { user?: UserType },
@@ -90,39 +91,29 @@ export const deleteSubscribePlan = async (
 };
 
 export const getSubscribePlans = async (
-  req: Request,
+  req: CustomRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+    const totalPlans = await Subscribe.countDocuments(query);
+
+    let page = parseInt(req.query.page as string) || 1;
+    if (page === -1) page = 1;
+
+    const limit = parseInt(req.query.limit as string) || totalPlans;
     const skip = (page - 1) * limit;
 
-    //page =-1 mean : get all results
-    if (page === -1) {
-      const subscribePlans = await Subscribe.find().populate({
-        path: "users_id",
-        select: "-password",
-      });
+    const totalPages = Math.ceil(totalPlans / limit);
 
-      return sendResponse(res, 200, {
-        status: "success",
-        data: {
-          subscribePlans,
-        },
-      });
-    } else {
-      const subscribePlans = await Subscribe.find()
+      const subscribePlans = await Subscribe.find(query)
         .populate({
           path: "users_id.user",
           select: "-password",
         })
         .skip(skip)
         .limit(limit);
-
-      const totalPlans = await Subscribe.countDocuments();
-      const totalPages = Math.ceil(totalPlans / limit);
 
       return sendResponse(res, 200, {
         status: "success",
@@ -136,7 +127,6 @@ export const getSubscribePlans = async (
           },
         },
       });
-    }
   } catch (error) {
     next(error);
   }

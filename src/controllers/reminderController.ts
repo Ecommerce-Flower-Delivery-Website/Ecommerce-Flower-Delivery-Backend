@@ -2,19 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { sendResponse } from "@/utils/sendResponse";
 import Reminder from "./../models/reminderModel";
 import { User, UserType } from "@/models/userModel";
-import nodemailer from "nodemailer";
-import { reminderSchema } from "@/validation/reminderValidation";
-import { mailOptionsSchema } from "@/validation/sendEmailValidation";
+import { sendEmail } from "../utils/sendEmail";
 
-const transport = nodemailer.createTransport({
-  host: "sandbox.smtp.mailtrap.io",
-  port: 2525,
-  secure: false,
-  auth: {
-    user: "97984da651af3d",
-    pass: "adf12721817edf",
-  },
-});
 
 const ReminderController = {
   async addReminder(
@@ -42,13 +31,17 @@ const ReminderController = {
     res: Response,
     next: NextFunction
   ) {
-    const reminderUsers = await User.find({ isReminder: true }).select(
-      "name email phone"
-    );
-    if (!reminderUsers) {
-      sendResponse(res, 404, { status: "fail", message: "user not found" });
+    try{
+      const reminderUsers = await User.find({ isReminder: true }).select(
+        "name email phone"
+      );
+      if (!reminderUsers) {
+        return sendResponse(res, 404, { status: "fail", message: "user not found" });
+      }
+      return sendResponse(res, 200, { status: "success", data: reminderUsers });
+    }catch(err){
+      next(err);
     }
-    sendResponse(res, 200, { status: "success", data: reminderUsers });
   },
   async removeReminder(
     req: Request & { user?: UserType & { _id: string } },
@@ -96,13 +89,7 @@ const ReminderController = {
   `;
 
       const promise = mailList.map((mail) => {
-        const mailOptions = {
-          from: "FlowerDelivery@company.com",
-          to: mail.email,
-          subject,
-          html: customHtml,
-        };
-        return transport.sendMail(mailOptions);
+          return sendEmail(mail.email,subject,customHtml);
       });
 
       await Promise.all(promise);

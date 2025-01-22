@@ -5,17 +5,21 @@ import {
   addCategorySchema,
   editCategorySchema,
 } from "@/validation/categoryValidation";
+import { CustomRequest } from "@/types/customRequest";
+import productModel from "@/models/productModel";
+import { removeProductFromAccessories } from "@/utils/databaseHelpers";
 
 const CategoryController = {
-  async getCategories(req: Request, res: Response, next: NextFunction) {
+  async getCategories(req: CustomRequest, res: Response, next: NextFunction) {
     try {
-      const countCategoryDocuments = await Category.countDocuments();
+      const query : { [key: string]: RegExp } = req.queryFilter ?? {};
+      const totalCategories = await Category.countDocuments(query);
+
       const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || countCategoryDocuments;
+      const limit = parseInt(req.query.limit as string) || totalCategories;
       const skip = (page - 1) * limit;
 
-      const categories = await Category.find().skip(skip).limit(limit);
-      const totalCategories = await Category.countDocuments();
+      const categories = await Category.find(query).skip(skip).limit(limit);
       const totalPages = Math.ceil(totalCategories / limit);
 
       sendResponse(res, 200, {
@@ -98,6 +102,14 @@ const CategoryController = {
         return;
       }
 
+      // Removes all products related to the category`,
+      // ensuring that each product is unlinked from the related accessories before deleting the product.
+      const productsRelatedToCategory = await productModel.find({category_id: id});
+      for (const product of productsRelatedToCategory) {
+        await removeProductFromAccessories(product);
+        await productModel.findByIdAndDelete(product._id);
+      }
+    
       await Category.findByIdAndDelete(id);
 
       sendResponse(res, 200, {

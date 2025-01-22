@@ -12,14 +12,14 @@ const accessorySchema = new mongoose.Schema(
       required: true,
     },
     stock: {
-      type: Number,
+      type: String,
       default: 0,
     },
     description: {
       type: String,
     },
     price: {
-      type: Number,
+      type: String,
       required: true,
     },
     products_array: {

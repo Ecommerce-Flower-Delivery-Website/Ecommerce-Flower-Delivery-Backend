@@ -12,11 +12,7 @@ const reviewSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: true,
-    },
-    shouldShow: {
-      type: Boolean,
-      default: false,
-    },
+    }
   },
   { timestamps: true }
 );
