@@ -13,6 +13,7 @@ async function initSuperAdmin() {
         phone: "0934108130",
         password: "admin123",
         isAdmin: true,
+        isAccountVerified: true
       });
       await admin.save();
 
