@@ -14,7 +14,7 @@ router
     productController.getProducts
   )
   .post(
-    // adminAuthMiddleware,
+     adminAuthMiddleware,
     upload.single("image"),
     productController.addProduct
   );
@@ -26,11 +26,11 @@ router
     productController.getProduct
   )
   .delete(
-    // adminAuthMiddleware,
+    adminAuthMiddleware,
     productController.deleteProducts
   )
   .put(
-    // adminAuthMiddleware,
+    adminAuthMiddleware,
     upload.single("image"),
     productController.editProduct
   );

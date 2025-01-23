@@ -10,8 +10,8 @@ router.get("/", filterMiddleware, userController.getUsers);
 
 router.get("/:id", userController.getUser);
 
-router.patch("/:id", userController.updateUser);
+router.patch("/:id",adminAuthMiddleware, userController.updateUser);
 
-router.delete("/:id", userController.deleteUser);
+router.delete("/:id",adminAuthMiddleware, userController.deleteUser);
 
 export default router;

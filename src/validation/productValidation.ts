@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import z from "zod";
 
 const addProductSchema = z.object({
-  priceAfterDiscount: z.string().min(0),
   discount: z.string().min(0).optional(),
   quantity: z.string().min(0),
   title: z.string().trim().min(1),

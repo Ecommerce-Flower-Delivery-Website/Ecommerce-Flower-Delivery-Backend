@@ -16,13 +16,13 @@ const router = express.Router();
 router
   .route("/")
   .get( filterMiddleware, getAllAccessoriesController)
-  .post( upload.single("image"), createAccessoryController);
+  .post(adminAuthMiddleware, upload.single("image"), createAccessoryController);
 
 //* /api/v1/accessory/:id
 router
   .route("/:id")
   .get(getAccessoryByIdController)
-  .put( updateAccessoryController)
-  .delete( deleteAccessoryController);
+  .put(adminAuthMiddleware, updateAccessoryController)
+  .delete(adminAuthMiddleware,  deleteAccessoryController);
 
 export default router;

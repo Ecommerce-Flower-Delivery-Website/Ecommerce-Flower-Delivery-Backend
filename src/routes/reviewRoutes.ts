@@ -7,12 +7,12 @@ import filterMiddleware from "@/middleware/filterMiddleware";
 const reviewRouter = express.Router();
 
 reviewRouter
-  .post("/", reviwController.createReview)
+  .post("/",adminAuthMiddleware, reviwController.createReview)
   .get("/", filterMiddleware, reviwController.getReviews);
 
 reviewRouter
   .route("/:id")
-  .delete(reviwController.deleteReview)
-  .put(reviwController.editReview);
+  .delete(adminAuthMiddleware, reviwController.deleteReview)
+  .put(adminAuthMiddleware, reviwController.editReview);
 
 export default reviewRouter;

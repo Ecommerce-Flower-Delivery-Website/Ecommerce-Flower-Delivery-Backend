@@ -78,8 +78,6 @@ const ProductController = {
         price: req.body.price,
         stock: req.body.stock,
         description: req.body.description,
-        priceAfterDiscount: req.body.priceAfterDiscount,
-        discount: req.body.discount,
         quantity: req.body.quantity,
         category_id: req.body.category_id,
         // Handle image upload
