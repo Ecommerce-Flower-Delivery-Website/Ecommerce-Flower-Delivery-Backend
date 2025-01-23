@@ -3,6 +3,8 @@ import User from "./../models/userModel";
 import { sendResponse } from "@/utils/sendResponse";
 import { userUpdateSchema } from "@/validation/userValidation";
 import { CustomRequest } from "@/types/customRequest";
+import contactModel from "@/models/contactModel";
+import mongoose from "mongoose";
 
 const getUsers = async (req: CustomRequest, res: Response, next: NextFunction) => {
   try {
@@ -90,6 +92,12 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
 
+    //remove it from contact if you have document with isChesked: false
+    await contactModel.deleteOne({
+      user_id: userId,
+      isChecked: false
+    })    
+    
     await User.findByIdAndDelete(userId);
     sendResponse(res, 200, { status: "success", data: user });
   } catch (error) {

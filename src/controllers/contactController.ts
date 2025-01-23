@@ -29,7 +29,7 @@ export default {
       })
         .skip(skip)
         .limit(limit)
-        .populate("user_id");      
+        .populate("user_id"); 
 
       const totalPages = Math.ceil(totalContacts / limit);
 
