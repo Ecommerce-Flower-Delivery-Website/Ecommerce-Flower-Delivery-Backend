@@ -7,7 +7,7 @@ const router = express.Router();
     
 router.route("/")
     .get( reminderController.getReminders)
-    .post(adminAuthMiddleware, reminderController.addReminder)
+    .post(authMiddleware, reminderController.addReminder)
     .delete(adminAuthMiddleware, reminderController.removeReminder)
 
 router.route("/send-email")
