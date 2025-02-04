@@ -22,8 +22,7 @@ import { access } from "fs";
 
 export const getAllAccessoriesController = async (
   req: CustomRequest,
-  res: Response,
-  next: NextFunction
+  res: Response
 ): Promise<void> => {
   try {
     const query : { [key: string]: RegExp } = req.queryFilter ?? {};
@@ -48,8 +47,10 @@ export const getAllAccessoriesController = async (
       totalPages,
     });
   } catch (error) {
-    next(error);
-
+    res.status(500).json({
+      message: "Failed to fetch accessories",
+      error: error,
+    });
   }
 };
 
@@ -128,7 +129,6 @@ export const getAccessoryByIdController = async (
 
     res.status(200).json(accessory);
   } catch (err) {
-    next(err);
     res.status(500).json({ error: err, message: "Internal Server Error" });
   }
 };
@@ -147,6 +147,8 @@ export const updateAccessoryController = async (
 ): Promise<any> => {
   try {
     const { id } = req.params;
+
+    console.log(req.body);
     
 
     const parsedBody = updateAccessorySchema.parse(req.body);
