@@ -71,7 +71,6 @@ export default {
       const newContact = await Contact.create({ user_id: user._id });
       sendResponse(res, 201, { status: "success", data: newContact });
     } catch (error) {
-      console.log(error);
 
       next(error);
     }

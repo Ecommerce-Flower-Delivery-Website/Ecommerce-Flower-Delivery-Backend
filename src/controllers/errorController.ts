@@ -11,6 +11,8 @@ const globalErrorHandling = (
   res: Response,
   next: NextFunction
 ) => {
+  console.log(error);
+  
   if (error instanceof ZodError) {
     sendResponse(res, 400, {
       status: "fail",

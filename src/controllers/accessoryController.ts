@@ -147,8 +147,6 @@ export const updateAccessoryController = async (
 ): Promise<any> => {
   try {
     const { id } = req.params;
-
-    console.log(req.body);
     
 
     const parsedBody = updateAccessorySchema.parse(req.body);

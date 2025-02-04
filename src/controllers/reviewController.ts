@@ -24,7 +24,6 @@ export const createReview = async (
       data: ReviewData,
     });
   } catch (error) {
-    console.log(error);
 
     next(error);
   }
@@ -72,8 +71,6 @@ export const getReviews = async (
 
     const reviews = await Review.find(query).skip(skip).limit(limit);
     const totalPages = Math.ceil(totalReviews / limit);
-
-    console.log(totalPages);
     
 
     return sendResponse(res, 200, {

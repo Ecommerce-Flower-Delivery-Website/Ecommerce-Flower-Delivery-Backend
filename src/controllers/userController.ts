@@ -16,8 +16,6 @@ const getUsers = async (req: CustomRequest, res: Response, next: NextFunction) =
     const skip = (page - 1) * limit;
 
     const users = await User.find(query).select("-password").skip(skip).limit(limit);
-
-    console.log("new", page);
     
 
     const totalPages = Math.ceil(totalUsers / limit);

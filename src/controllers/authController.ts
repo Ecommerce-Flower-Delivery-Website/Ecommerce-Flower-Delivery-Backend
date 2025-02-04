@@ -199,7 +199,6 @@ export const login_admin = async (
       },
     });
   } catch (error) {
-    console.log(error, "error");
     next(error);
   }
 };
@@ -247,7 +246,6 @@ export const compareVerificationCode = async (
       },
     });
   } catch (error) {
-    console.log(error, "error");
     next(error);
   }
 };
@@ -307,7 +305,6 @@ export const resendCode = async (
       },
     });
   } catch (error) {
-    console.log(error, "error");
     next(error);
   }
 };
@@ -348,7 +345,6 @@ export const forgotPassword = async (
       data: { user },
     });
   } catch (error) {
-    console.log(error, "error");
     next(error);
   }
 };

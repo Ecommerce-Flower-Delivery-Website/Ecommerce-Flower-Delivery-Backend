@@ -6,8 +6,6 @@ const filterMiddleware = (req: CustomRequest, res: Response, next: NextFunction)
       const field = req.query.field as string | undefined;
       const value = req.query.value as string | undefined;
       const query : { [key: string]: RegExp } = {};
-
-      console.log(req.query);
   
        if (field && value) {
          query[field] = new RegExp(value, "i");
