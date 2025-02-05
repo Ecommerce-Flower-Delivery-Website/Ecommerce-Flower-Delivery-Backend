@@ -71,7 +71,7 @@ const CategoryController = {
       const category = await Category.create({
         title: req.body.title,
         image: req.file
-          ? `/public/upload/images/categories/${req.file.filename}`
+          ? `/upload/images/categories/${req.file.filename}`
           : null,
         description: req.body.description,
       });
@@ -140,7 +140,7 @@ const CategoryController = {
       category.description = req.body.description ?? category.description;
 
       if (req.file) {
-        category.image = `/public/upload/images/categories/${req.file.filename}`;
+        category.image = `/upload/images/categories/${req.file.filename}`;
       }
 
       const updatedCategory = await category.save();

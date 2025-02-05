@@ -21,7 +21,7 @@ export const createSubscribePlan = async (
     if (image) {
       req.body = {
         ...req.body,
-        image: `/public/upload/images/subscribe-plans/${image}`,
+        image: `/upload/images/subscribe-plans/${image}`,
       };
     } else {
       req.body = { ...req.body, image: "" };
@@ -144,7 +144,7 @@ export const editSubscribePlan = async (
     if (image) {
       req.body = {
         ...req.body,
-        image: `/public/upload/images/subscribe-plans/${image}`,
+        image: `/upload/images/subscribe-plans/${image}`,
       };
     } else {
       req.body = { ...req.body, image: "" };
@@ -167,8 +167,8 @@ export const editSubscribePlan = async (
 
     findSubscribePlan.features = req.body.features;
     findSubscribePlan.image = req.body.image
-      ? `/public/upload/images/subscribe-plans/${req.body.image}`
-      : `/public/upload/images/subscribe-plans/${findSubscribePlan.image}`;
+      ? `/upload/images/subscribe-plans/${req.body.image}`
+      : `/upload/images/subscribe-plans/${findSubscribePlan.image}`;
 
     const updatedSubscribePlan = await findSubscribePlan.save();
 

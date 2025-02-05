@@ -78,7 +78,7 @@ export const createAccessoryController = async (
       stock: Number(req.body.stock),
       description: req.body.description,
       image: req.file
-        ? `/public/upload/images/accessories/${req.file.filename}`
+        ? `/upload/images/accessories/${req.file.filename}`
         : null,
         products_array
     });   

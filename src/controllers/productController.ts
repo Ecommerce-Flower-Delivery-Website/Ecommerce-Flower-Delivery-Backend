@@ -82,7 +82,7 @@ const ProductController = {
         category_id: req.body.category_id,
         // Handle image upload
         image: req.file
-          ? `/public/upload/images/products/${req.file.filename}`
+          ? `/upload/images/products/${req.file.filename}`
           : null,
       });
       category.products.push(product._id);
@@ -172,7 +172,7 @@ const ProductController = {
       product.quantity = req.body.quantity ?? product.quantity;
       product.category_id = req.body.category_id ?? product.category_id;
       if (req.file) {
-        product.image = `/public/upload/images/products/${req.file.filename}`;
+        product.image = `/upload/images/products/${req.file.filename}`;
       }
 
       const updatedProduct = await product.save();
