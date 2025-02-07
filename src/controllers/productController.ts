@@ -165,16 +165,17 @@ const ProductController = {
         return;
       }
 
-      const updatedProduct = await Product.findByIdAndUpdate(id, {
-        title: req.body.title ?? product.title,
-        price: req.body.price ?? product.price,
-        stock: req.body.stock ?? product.stock,
-        description: req.body.description ?? product.description,
-        quantity: req.body.quantity ?? product.quantity,
-        category_id: req.body.category_id ?? product.category_id,
-        image: req.file ? `/upload/images/products/${req.file.filename}` : product.image
-      }, { new: true });
-      
+      product.title = req.body.title ?? product.title;
+      product.price = req.body.price ?? product.price;
+      product.stock = req.body.stock ?? product.stock;
+      product.description = req.body.description ?? product.description;
+      product.quantity = req.body.quantity ?? product.quantity;
+      product.category_id = req.body.category_id ?? product.category_id;
+      if (req.file) {
+        product.image = `/upload/images/products/${req.file.filename}`;
+      }
+
+      const updatedProduct = await product.save();
       res.status(200).json({
         status: "success",
         data: {

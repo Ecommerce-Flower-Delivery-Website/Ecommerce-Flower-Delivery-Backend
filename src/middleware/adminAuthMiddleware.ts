@@ -39,7 +39,9 @@ export const adminAuthMiddleware = async (
 
       req.user = user;
       next();
-    } catch {
+    } catch(err) {
+      console.log(err);
+      
       sendResponse(res, 401, {
         status: "fail",
         message: `Invalid token`,
