@@ -6,9 +6,9 @@ import express from "express";
 
 const router = express.Router();
 
-router.post("/", authMiddleware, OrdersController.create);
+router.post("/", adminAuthMiddleware, OrdersController.create);
 router.get("/", adminAuthMiddleware, OrdersController.getAll);
-router.get("/:id", authMiddleware, OrdersController.getById);
+router.get("/:id", adminAuthMiddleware, OrdersController.getById);
 router.put("/:id", adminAuthMiddleware, OrdersController.toggleStatus);
 router.delete("/:id", adminAuthMiddleware, OrdersController.delete);
 
