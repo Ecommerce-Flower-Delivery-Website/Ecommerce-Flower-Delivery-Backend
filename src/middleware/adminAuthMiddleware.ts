@@ -21,6 +21,10 @@ export const adminAuthMiddleware = async (
   if (token) {
     try {
       const decoded = verifyToken(token) as { id: string };
+      
+      console.log("token is: ", token);
+      console.log("decoded token is: ", decoded);
+
       const user = await User.findById(decoded.id);
 
       if (!user) {
